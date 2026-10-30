@@ -7,7 +7,7 @@ import {
 import { useMemo, useState } from "react";
 import { api, errorText } from "../../api/client";
 import type { Finding, JsonPatchOp, Observation, Proposal } from "../../api/types";
-import { CODE_INFO, CodeTag, ConfidenceBar, ErrorAlert, JsonBlock, TIER_TEXT } from "../../components/common";
+import { Chip, CODE_INFO, CodeTag, ConfidenceBar, ErrorAlert, JsonBlock, TIER_TEXT } from "../../components/common";
 import { DiffView } from "../../components/editors";
 import JobRunner from "../../components/JobRunner";
 import { applyPatch, patchScope, subtree, toYaml } from "../../lib/patch";
@@ -124,7 +124,7 @@ export default function ProposalsTab({ project, specId, selectSpec, goTab }: Tab
         }} />
       <ErrorAlert error={proposals.error || findings.error} />
       <Row gutter={12}>
-        <Col xs={24} xxl={11}>
+        <Col xs={24} xxl={13}>
           <Table<Row> size="small" rowKey="key" dataSource={rows} loading={proposals.isLoading} pagination={{ pageSize: 15 }}
             data-testid="proposals-table"
             rowClassName={(r) => (r.key === selected ? "ant-table-row-selected" : "")}
@@ -133,15 +133,14 @@ export default function ProposalsTab({ project, specId, selectSpec, goTab }: Tab
               { title: "Mã", width: 60, render: (_, r) => <CodeTag code={r.finding.code} /> },
               { title: "Operation / vị trí", render: (_, r) => <><code>{r.finding.operation_id}</code><br />
                 <Typography.Text type="secondary" style={{ fontSize: 12 }}>{r.finding.location}</Typography.Text></> },
-              { title: "Độ tin cậy", width: 130, render: (_, r) => <ConfidenceBar value={r.proposal?.confidence ?? r.finding.confidence} /> },
-              { title: "Nhãn", render: (_, r) => <Space size={2} wrap>
-                {r.proposal && <Tag color={TIER_TEXT[r.proposal.tier].color}>{TIER_TEXT[r.proposal.tier].text}</Tag>}
-                {r.finding.doc_conflict && <Tag color="red">Mâu thuẫn tài liệu</Tag>}
-                {!r.proposal && <Tag>Chỉ báo cáo</Tag>}
+              { title: "Độ tin cậy", width: 116, render: (_, r) => <ConfidenceBar value={r.proposal?.confidence ?? r.finding.confidence} width={100} /> },
+              { title: "Nhãn / trạng thái", render: (_, r) => <Space direction="vertical" size={3}>
+                {r.proposal ? <Chip tone={TIER_TEXT[r.proposal.tier].tone}>{TIER_TEXT[r.proposal.tier].text}</Chip> : <Chip tone="muted">Chỉ báo cáo</Chip>}
+                {r.finding.doc_conflict && <Chip tone="coral">Mâu thuẫn tài liệu</Chip>}
+                {r.proposal ? <Tag color={STATUS_TEXT[r.proposal.status]?.color}>{STATUS_TEXT[r.proposal.status]?.text ?? r.proposal.status}</Tag> : <Tag>{r.finding.status}</Tag>}
               </Space> },
-              { title: "Trạng thái", render: (_, r) => r.proposal ? <Tag color={STATUS_TEXT[r.proposal.status]?.color}>{STATUS_TEXT[r.proposal.status]?.text ?? r.proposal.status}</Tag> : <Tag>{r.finding.status}</Tag> },
-              { title: "", width: 150, render: (_, r) => r.proposal && ["pending", "rejected", "accepted", "edited"].includes(r.proposal.status) ? (
-                <Space size={4} onClick={(e) => e.stopPropagation()}>
+              { title: "", render: (_, r) => r.proposal && ["pending", "rejected", "accepted", "edited"].includes(r.proposal.status) ? (
+                <Space size={4} wrap onClick={(e) => e.stopPropagation()}>
                   <Button size="small" type="primary" data-testid={`accept-${r.proposal.id}`} disabled={r.proposal.status === "accepted"}
                     onClick={() => review.mutate({ id: r.proposal!.id, action: "accept" })}>Chấp nhận</Button>
                   <Button size="small" danger disabled={r.proposal.status === "rejected"}
@@ -149,7 +148,7 @@ export default function ProposalsTab({ project, specId, selectSpec, goTab }: Tab
                 </Space>) : null },
             ]} />
         </Col>
-        <Col xs={24} xxl={13}>
+        <Col xs={24} xxl={11}>
           {current ? <Detail row={current} content={spec.data?.content} onChanged={invalidate} /> :
             <Empty description="Chọn một sai lệch để xem bằng chứng và JSON Patch" />}
         </Col>

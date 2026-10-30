@@ -8,8 +8,9 @@ import { useState } from "react";
 import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { api, errorText } from "../../api/client";
 import type { Evaluation, PRF } from "../../api/types";
-import { ErrorAlert, fmt, fmtDate } from "../../components/common";
+import { chartAxis, chartTooltip, ErrorAlert, fmt, fmtDate } from "../../components/common";
 import JobRunner from "../../components/JobRunner";
+import { C, CHART, FONT_MONO } from "../../theme";
 import type { TabProps } from "./types";
 
 const CAT_VI: Record<string, string> = {
@@ -89,7 +90,7 @@ function Report({ ev }: { ev: Evaluation }) {
           <Col xs={12} md={6} xl={3}><Card size="small"><Statistic title="Precision" value={fmt(l5.micro.precision)} /></Card></Col>
           <Col xs={12} md={6} xl={3}><Card size="small"><Statistic title="Recall" value={fmt(l5.micro.recall)} /></Card></Col>
           <Col xs={12} md={6} xl={3}><Card size="small"><Statistic title="F1 (micro)" value={fmt(l5.micro.f1)} /></Card></Col>
-          <Col xs={12} md={6} xl={3}><Card size="small"><Statistic title="F1 ràng buộc (bỏ type)" value={fmt(l5.constraint_no_type.f1)} valueStyle={{ color: "#1f6feb" }} /></Card></Col>
+          <Col xs={12} md={6} xl={3}><Card size="small"><Statistic title="F1 ràng buộc (bỏ type)" value={fmt(l5.constraint_no_type.f1)} valueStyle={{ color: C.lime }} /></Card></Col>
           <Col xs={12} md={6} xl={3}><Card size="small"><Statistic title="Hallucination / Omission" value={`${fmt(l5.hallucination_rate, 2)} / ${fmt(l5.omission_rate, 2)}`} /></Card></Col>
         </>}
       </Row>
@@ -97,14 +98,14 @@ function Report({ ev }: { ev: Evaluation }) {
         <Card size="small" title={`P/R/F1 theo nhóm fact – so với ${m?.ground_truth_kind === "behavior" ? "GT hành vi" : "GT tài liệu"} (${l5.n_pred_facts} fact sinh / ${l5.n_gt_facts} fact GT)`}>
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={chart}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="name" interval={0} tick={{ fontSize: 11 }} />
-              <YAxis domain={[0, 1]} />
-              <Tooltip formatter={(v: number) => v.toFixed(3)} />
-              <Legend />
-              <Bar dataKey="P" fill="#91caff" />
-              <Bar dataKey="R" fill="#b7eb8f" />
-              <Bar dataKey="F1" fill="#1f6feb" />
+              <CartesianGrid stroke={C.lineSoft} vertical={false} />
+              <XAxis dataKey="name" interval={0} {...chartAxis} />
+              <YAxis domain={[0, 1]} {...chartAxis} width={36} />
+              <Tooltip formatter={(v: number) => v.toFixed(3)} {...chartTooltip} />
+              <Legend wrapperStyle={{ fontSize: 12, fontFamily: FONT_MONO }} />
+              <Bar dataKey="P" fill={CHART[1]} radius={[3, 3, 0, 0]} />
+              <Bar dataKey="R" fill={CHART[4]} radius={[3, 3, 0, 0]} />
+              <Bar dataKey="F1" fill={CHART[0]} radius={[3, 3, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
           <PrfTable title="Theo nhóm fact" data={l5.by_category} names={CAT_VI} />

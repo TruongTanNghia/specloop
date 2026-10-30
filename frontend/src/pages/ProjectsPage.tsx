@@ -1,11 +1,11 @@
-import { PlusOutlined } from "@ant-design/icons";
+import { PlusOutlined, SearchOutlined } from "@ant-design/icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { App, Button, Popconfirm, Space, Table, Tag, Typography } from "antd";
-import { useState } from "react";
+import { App, Button, Input, Popconfirm } from "antd";
+import { useState, type CSSProperties, type MouseEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { api, errorText } from "../api/client";
 import type { Project } from "../api/types";
-import { ErrorAlert, fmtDate } from "../components/common";
+import { Chip, ErrorAlert, fmtDate, PageHead } from "../components/common";
 import ProjectForm from "../components/ProjectForm";
 
 export default function ProjectsPage() {
@@ -13,6 +13,7 @@ export default function ProjectsPage() {
   const nav = useNavigate();
   const { message } = App.useApp();
   const [open, setOpen] = useState(false);
+  const [filter, setFilter] = useState("");
   const q = useQuery({ queryKey: ["projects"], queryFn: api.projects });
   const create = useMutation({
     mutationFn: api.createProject,
@@ -26,32 +27,67 @@ export default function ProjectsPage() {
   const remove = useMutation({
     mutationFn: api.deleteProject,
     onSuccess: () => qc.invalidateQueries({ queryKey: ["projects"] }),
+    onError: (e) => message.error(errorText(e)),
   });
+  const f = filter.trim().toLowerCase();
+  const list = (q.data ?? []).filter((p) => !f || p.name.toLowerCase().includes(f) || (p.base_url ?? "").toLowerCase().includes(f));
+
+  // Thẻ là vùng bấm; bỏ qua khi bấm vào link con hoặc hộp xác nhận xóa (render qua portal nhưng sự kiện vẫn nổi lên).
+  const openCard = (e: MouseEvent<HTMLElement>, id: number) => {
+    if ((e.target as HTMLElement).closest("a, button, .ant-popover")) return;
+    nav(`/projects/${id}`);
+  };
+
   return (
-    <Space direction="vertical" style={{ width: "100%" }}>
-      <Space style={{ justifyContent: "space-between", width: "100%" }}>
-        <Typography.Title level={3} style={{ margin: 0 }}>Dự án</Typography.Title>
-        <Button type="primary" icon={<PlusOutlined />} onClick={() => setOpen(true)}>Tạo dự án</Button>
-      </Space>
+    <>
+      <PageHead eyebrow="Dự án" title="Dự án"
+        lede="Mỗi dự án là một API: tài liệu nguồn, các phiên bản đặc tả, lượt kiểm thử và đề xuất sửa."
+        actions={<Button type="primary" icon={<PlusOutlined />} onClick={() => setOpen(true)}>Tạo dự án</Button>} />
       <ErrorAlert error={q.error} />
-      <Table<Project> rowKey="id" loading={q.isLoading} dataSource={q.data ?? []} pagination={{ pageSize: 20 }}
-        columns={[
-          { title: "Tên", dataIndex: "name", render: (v, r) => <Link to={`/projects/${r.id}`}>{v}</Link> },
-          { title: "Base URL", dataIndex: "base_url", render: (v) => v ? <code>{v}</code> : "–" },
-          { title: "Phiên bản", render: (_, r) => r.stats?.versions ?? 0 },
-          { title: "Mới nhất", render: (_, r) => r.stats?.latest_version_label ? <Tag>{r.stats.latest_version_label}</Tag> : "–" },
-          { title: "Sai lệch mở", render: (_, r) => r.stats?.open_findings ?? 0 },
-          { title: "Đề xuất chờ", render: (_, r) => r.stats?.pending_proposals ?? 0 },
-          { title: "Tạo lúc", dataIndex: "created_at", render: fmtDate },
-          {
-            title: "", width: 80, render: (_, r) => (
-              <Popconfirm title="Xóa dự án và toàn bộ dữ liệu?" okText="Xóa" cancelText="Hủy" onConfirm={() => remove.mutate(r.id)}>
-                <Button danger size="small">Xóa</Button>
-              </Popconfirm>
-            ),
-          },
-        ]} />
+      <div className="toolbar reveal" style={{ "--i": 1 } as CSSProperties}>
+        <Input allowClear prefix={<SearchOutlined style={{ color: "#5b6672" }} />} placeholder="Tìm theo tên hoặc base URL"
+          value={filter} onChange={(e) => setFilter(e.target.value)} style={{ maxWidth: 360 }} />
+        <Chip>{list.length} / {q.data?.length ?? 0} dự án</Chip>
+      </div>
+      {!q.isLoading && !list.length && (
+        <div className="empty reveal">{q.data?.length ? "Không có dự án nào khớp bộ lọc." : "Chưa có dự án. Bấm “Tạo dự án” để bắt đầu."}</div>
+      )}
+      <div className="proj-grid">
+        {list.map((p, i) => <ProjectCard key={p.id} p={p} index={i} onOpen={openCard} onDelete={() => remove.mutate(p.id)} />)}
+      </div>
       <ProjectForm open={open} onCancel={() => setOpen(false)} onSubmit={(v) => create.mutate(v)} loading={create.isPending} />
-    </Space>
+    </>
+  );
+}
+
+function ProjectCard({ p, index, onOpen, onDelete }: {
+  p: Project; index: number; onOpen: (e: MouseEvent<HTMLElement>, id: number) => void; onDelete: () => void;
+}) {
+  const s = p.stats;
+  return (
+    <article className="proj-card reveal" style={{ "--i": Math.min(index, 8) + 2 } as CSSProperties} onClick={(e) => onOpen(e, p.id)}>
+      <div className="top">
+        <div style={{ minWidth: 0 }}>
+          <div className="id">DỰ ÁN #{p.id}</div>
+          <h3><Link to={`/projects/${p.id}`} style={{ color: "inherit" }}>{p.name}</Link></h3>
+        </div>
+        {s?.latest_version_label && <Chip tone="lime">{s.latest_version_label}</Chip>}
+      </div>
+      <div className="url" title={p.base_url ?? undefined}>{p.base_url ?? "chưa có base URL"}</div>
+      {p.description && <p className="desc">{p.description}</p>}
+      <div className="nums">
+        <div>Tài liệu<b>{s?.documents ?? 0}</b></div>
+        <div>Phiên bản<b>{s?.versions ?? 0}</b></div>
+        <div>Sai lệch<b className={s?.open_findings ? "hot" : ""}>{s?.open_findings ?? 0}</b></div>
+        <div>Đề xuất<b className={s?.pending_proposals ? "go" : ""}>{s?.pending_proposals ?? 0}</b></div>
+      </div>
+      <div className="foot">
+        <span>{p.mode} · {p.policy}</span>
+        <span>{fmtDate(p.created_at)}</span>
+        <Popconfirm title="Xóa dự án và toàn bộ dữ liệu?" okText="Xóa" cancelText="Hủy" onConfirm={onDelete}>
+          <Button size="small" danger type="text" className="del">Xóa</Button>
+        </Popconfirm>
+      </div>
+    </article>
   );
 }

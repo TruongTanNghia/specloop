@@ -93,3 +93,10 @@ Nguyên tắc: chọn phương án đơn giản nhất chạy được, ghi lạ
 Tài khoản và phân quyền (FR-18), Alembic, crawl nhiều trang, tích hợp Schemathesis, chạy Playwright render trang JS, báo cáo HTML, Vitest cho từng component (đã có 1 test Playwright end-to-end). Gộp/tách phân đoạn không tự cập nhật `operation_hint` của phần mới.
 
 - Tham số path không khai báo kiểu (thường gặp khi tài liệu không nêu) được thử với giá trị `1`.
+
+## 11. Giao diện
+
+- Theme tối kiểu “phòng điều khiển”: nền than chì, một màu nhấn xanh chanh (`#d4ff3a`) cho trạng thái khớp/hành động chính, san hô (`#ff6b4a`) cho sai lệch/lỗi, cyan cho ngữ cảnh. Token khai báo một chỗ (`frontend/src/theme.ts`) và bơm vào Ant Design qua `ConfigProvider` + biến CSS, nên component AntD và phần tự viết dùng chung bảng màu.
+- Font tự đóng gói qua `@fontsource` (Bricolage Grotesque cho tiêu đề, Be Vietnam Pro cho nội dung, JetBrains Mono cho mã/nhãn) – cả ba có bộ ký tự tiếng Việt; không tải từ CDN để chạy offline/trong docker.
+- Sáu bước của dự án được đánh số 01–06 ngay trên thanh tab để người dùng thấy mình đang ở đâu trong vòng lặp. Monaco dùng theme riêng cùng bảng màu; Swagger UI chỉ có bản sáng nên lớp trong được đảo màu bằng CSS filter, viền ngoài giữ theo theme.
+- Mọi `data-testid` và nhãn mà e2e Playwright dựa vào được giữ nguyên khi làm lại giao diện.

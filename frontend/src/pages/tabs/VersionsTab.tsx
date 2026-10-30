@@ -5,6 +5,7 @@ import { useState } from "react";
 import { api } from "../../api/client";
 import { ErrorAlert, fmtDate, JsonBlock } from "../../components/common";
 import { DiffView } from "../../components/editors";
+import { C } from "../../theme";
 import type { TabProps } from "./types";
 
 const LABEL_COLOR: Record<string, string> = { generated: "blue", repaired: "cyan", manual: "orange", imported: "default" };
@@ -26,7 +27,7 @@ export default function VersionsTab({ specs, specId, selectSpec }: TabProps) {
       <Col xs={24} xl={6}>
         <Card size="small" title="Dòng thời gian phiên bản">
           <Timeline items={specs.map((s) => ({
-            color: s.id === specId ? "blue" : "gray",
+            color: s.id === specId ? C.lime : C.faint,
             children: (
               <div style={{ cursor: "pointer" }} onClick={() => { selectSpec(s.id); setAgainst(undefined); }}>
                 <Space size={4}><b>v{s.version_no}</b><Tag color={s.label.startsWith("refined") ? "green" : LABEL_COLOR[s.label]}>{s.label}</Tag>

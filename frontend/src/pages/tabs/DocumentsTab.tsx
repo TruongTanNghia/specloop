@@ -100,7 +100,7 @@ export default function DocumentsTab({ project, goTab }: TabProps) {
         </Card>
         <Card title="Tài liệu của dự án" size="small" style={{ marginTop: 16 }}>
           <List dataSource={docs.data ?? []} locale={{ emptyText: "Chưa có tài liệu" }} renderItem={(d) => (
-            <List.Item style={{ cursor: "pointer", background: d.id === currentDoc ? "#e6f4ff" : undefined, paddingLeft: 8 }}
+            <List.Item className={d.id === currentDoc ? "chunk-sel" : undefined} style={{ cursor: "pointer", paddingLeft: 8 }}
               onClick={() => setDocId(d.id)} actions={[
                 <Popconfirm key="x" title="Xóa tài liệu?" onConfirm={() => removeDoc.mutate(d.id)} okText="Xóa" cancelText="Hủy">
                   <Button size="small" danger type="link">Xóa</Button>
@@ -185,7 +185,7 @@ export default function DocumentsTab({ project, goTab }: TabProps) {
             </Space>
             <pre className="ev-doc" style={{ maxHeight: 360 }}>
               {splitting.chunk.text.slice(0, splitting.offset)}
-              <span style={{ background: "#ff4d4f", color: "#fff" }}>⟂</span>
+              <span className="split-mark">⟂</span>
               {splitting.chunk.text.slice(splitting.offset)}
             </pre>
           </Space>

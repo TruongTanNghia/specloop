@@ -9,6 +9,7 @@ import { api, errorText } from "../../api/client";
 import type { EvidenceItem, ValidationReport } from "../../api/types";
 import { ErrorAlert } from "../../components/common";
 import EvidenceDoc from "../../components/EvidenceDoc";
+import { C } from "../../theme";
 import JobRunner from "../../components/JobRunner";
 import { YamlEditor, type OnMount } from "../../components/editors";
 import { pointerAtLine } from "../../lib/yamlPointer";
@@ -130,13 +131,13 @@ export default function SpecTab({ project, specs, specId, selectSpec }: TabProps
             {current?.model && <Tag>mô hình: {current.model}</Tag>}
             {current?.note && <Typography.Text type="secondary">{current.note}</Typography.Text>}
             {pointer && <Typography.Text>Phần tử: <code data-testid="pointer">{pointer}</code></Typography.Text>}
-            {pointer && <Badge count={active.length} showZero color={active.length ? "#52c41a" : "#bfbfbf"} title="Số trích dẫn" />}
+            {pointer && <Badge count={active.length} showZero color={active.length ? C.lime : C.faint} title="Số trích dẫn" />}
             {dirty && <Tag color="orange">Có thay đổi chưa lưu</Tag>}
             {parsedDraft.error && <Tag color="red">YAML lỗi</Tag>}
           </Space>
           <Row gutter={12}>
             <Col xs={24} xl={showSwagger ? 7 : 10}>
-              <Card size="small" title={`Tài liệu (${evidence.data?.length ?? 0} trích dẫn)`} bodyStyle={{ padding: 6 }}>
+              <Card size="small" title={`Tài liệu (${evidence.data?.length ?? 0} trích dẫn)`} styles={{ body: { padding: 6 } }}>
                 {doc.data?.markdown ? (
                   <EvidenceDoc text={doc.data.markdown} evidence={evidence.data ?? []} activeIds={active.map((a) => a.id)} />
                 ) : <Empty description="Không có tài liệu" />}
@@ -149,14 +150,14 @@ export default function SpecTab({ project, specs, specId, selectSpec }: TabProps
               </Card>
             </Col>
             <Col xs={24} xl={showSwagger ? 9 : 14}>
-              <Card size="small" title="YAML (bấm vào một dòng để xem trích dẫn)" bodyStyle={{ padding: 0 }}>
+              <Card size="small" title="YAML (bấm vào một dòng để xem trích dẫn)" styles={{ body: { padding: 0 } }}>
                 <ErrorAlert error={yamlQ.error} />
                 {yamlQ.isLoading ? <Spin /> : <YamlEditor value={text} onChange={setDraft} onMount={onMount} height={620} />}
               </Card>
             </Col>
             {showSwagger && (
               <Col xs={24} xl={8}>
-                <Card size="small" title="Swagger UI" bodyStyle={{ padding: 0 }}>
+                <Card size="small" title="Swagger UI" styles={{ body: { padding: 0 } }}>
                   <Suspense fallback={<Spin />}>
                     {parsedDraft.spec ? <SwaggerView spec={parsedDraft.spec} /> : spec.data?.content ? <SwaggerView spec={spec.data.content} /> : null}
                   </Suspense>

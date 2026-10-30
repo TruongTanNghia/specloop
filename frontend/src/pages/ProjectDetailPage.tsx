@@ -1,10 +1,10 @@
 import { SettingOutlined } from "@ant-design/icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { App, Breadcrumb, Button, Descriptions, Select, Space, Tabs, Tag, Typography } from "antd";
+import { App, Button, Select, Tabs } from "antd";
 import { useState } from "react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
 import { api, errorText } from "../api/client";
-import { ErrorAlert } from "../components/common";
+import { Chip, ErrorAlert } from "../components/common";
 import ProjectForm from "../components/ProjectForm";
 import DocumentsTab from "./tabs/DocumentsTab";
 import EvaluationTab from "./tabs/EvaluationTab";
@@ -51,28 +51,33 @@ export default function ProjectDetailPage() {
   const p = project.data;
   if (!p) return <ErrorAlert error={project.error} />;
   const ctx = { project: p, specs: specs.data ?? [], specId, selectSpec, goTab };
+  const current = specs.data?.find((s) => s.id === specId);
   return (
-    <Space direction="vertical" style={{ width: "100%" }}>
-      <Breadcrumb items={[{ title: <Link to="/projects">Dự án</Link> }, { title: p.name }]} />
-      <Space style={{ width: "100%", justifyContent: "space-between" }} wrap>
-        <Typography.Title level={3} style={{ margin: 0 }} data-testid="project-title">{p.name}</Typography.Title>
-        <Space wrap>
-          <Typography.Text>Phiên bản đặc tả:</Typography.Text>
-          <Select style={{ minWidth: 260 }} value={specId ?? undefined} placeholder="Chưa có phiên bản"
+    <>
+      <header className="proj-head reveal">
+        <div style={{ minWidth: 0 }}>
+          <div className="eyebrow"><Link to="/projects">Dự án</Link><span>/ #{p.id}</span></div>
+          <h1 className="page-title" data-testid="project-title">{p.name}</h1>
+          {p.description && <p className="page-lede">{p.description}</p>}
+          <div className="meta-line">
+            <Chip tone={p.base_url ? "cyan" : "muted"} title="Base URL của API cần kiểm thử">{p.base_url ?? "chưa có base URL"}</Chip>
+            <Chip title="Chế độ kiểm thử">chế độ {p.mode}</Chip>
+            <Chip title="Chính sách khi mâu thuẫn tài liệu">{p.policy}</Chip>
+            <Chip title="Xác thực">xác thực {p.auth_config?.type ?? "none"}{p.has_secret ? " · đã lưu khóa" : ""}</Chip>
+            {p.reset_config && <Chip title="Reset SUT trước khi kiểm thử">reset {p.reset_config.method} {p.reset_config.url}</Chip>}
+            <Chip>{p.stats?.documents ?? 0} tài liệu · {p.stats?.versions ?? 0} phiên bản · {p.stats?.pending_proposals ?? 0} đề xuất chờ</Chip>
+          </div>
+        </div>
+        <div className="proj-actions">
+          <span className="lbl">Phiên bản</span>
+          <Select style={{ minWidth: 280 }} value={specId ?? undefined} placeholder="Chưa có phiên bản"
             data-testid="version-select" onChange={(v) => selectSpec(v)}
             options={(specs.data ?? []).map((s) => ({ value: s.id, label: `v${s.version_no} · ${s.label} (#${s.id})` }))} />
+          {current?.model && <Chip tone="muted">{current.model}</Chip>}
           <Button icon={<SettingOutlined />} onClick={() => setEditing(true)}>Cấu hình</Button>
-        </Space>
-      </Space>
-      <Descriptions size="small" column={{ xs: 1, md: 3 }} items={[
-        { key: "b", label: "Base URL", children: p.base_url ? <code>{p.base_url}</code> : "–" },
-        { key: "m", label: "Chế độ", children: <Tag>{p.mode}</Tag> },
-        { key: "po", label: "Chính sách", children: <Tag>{p.policy}</Tag> },
-        { key: "a", label: "Xác thực", children: `${p.auth_config?.type ?? "none"}${p.has_secret ? " (đã lưu khóa)" : ""}` },
-        { key: "r", label: "Reset SUT", children: p.reset_config ? `${p.reset_config.method} ${p.reset_config.url}` : "–" },
-        { key: "s", label: "Thống kê", children: `${p.stats?.documents ?? 0} tài liệu · ${p.stats?.versions ?? 0} phiên bản · ${p.stats?.pending_proposals ?? 0} đề xuất chờ` },
-      ]} />
-      <Tabs activeKey={tab} onChange={(k) => goTab(k)} destroyInactiveTabPane items={[
+        </div>
+      </header>
+      <Tabs className="pipeline" activeKey={tab} onChange={(k) => goTab(k)} destroyInactiveTabPane items={[
         { key: "documents", label: "Tài liệu", children: <DocumentsTab {...ctx} /> },
         { key: "spec", label: "Đặc tả", children: <SpecTab {...ctx} /> },
         { key: "evaluation", label: "Đánh giá", children: <EvaluationTab {...ctx} /> },
@@ -82,6 +87,6 @@ export default function ProjectDetailPage() {
       ]} />
       <ProjectForm open={editing} initial={p} onCancel={() => setEditing(false)} onSubmit={(v) => update.mutate(v)}
         loading={update.isPending} />
-    </Space>
+    </>
   );
 }
