@@ -171,7 +171,7 @@ F1 ràng buộc không tính từ khóa `type`. Petstore không có SUT chạy c
 | API | Mô hình | Cấu hình | Hợp lệ OAS 3.0.3 | Operation | P | R | **F1** | F1 ràng buộc (tài liệu) | F1 ràng buộc (hành vi) | Thời gian sinh |
 |---|---|---|---|---:|---:|---:|---:|---:|---:|---:|
 | bookstore-lab | qwen3:8b (lai CPU/GPU) | C0 / C1 | có | 8/8 | 0,988 | 0,558 | **0,713** | 0,571 | 0,517 | ≈ 27 phút |
-| bookstore-lab | qwen3:8b | C2 (287 request, 2 vòng) | có | 8/8 | 0,988 | 0,569 | **0,722** | 0,601 | 0,545 | + 70 s |
+| bookstore-lab | qwen3:8b | C2 (287 request, 2 vòng) | có | 8/8 | 0,988 | 0,568 | **0,722** | 0,601 | 0,545 | + 70 s |
 | bookstore-lab | qwen3-4b-gpu (100% GPU) | C1 | có | 8/8 | 0,899 | 0,281 | **0,428** | 0,269 | 0,215 | ≈ 1,5 phút |
 | petstore3 | qwen3-4b-gpu (100% GPU) | C1 | có | 19/19 | 0,720 | 0,557 | **0,628** | 0,223 | – | ≈ 3,5 phút |
 
