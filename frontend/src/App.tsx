@@ -1,5 +1,8 @@
+import {
+  ApiOutlined, DashboardOutlined, ExperimentOutlined, FolderOpenOutlined, RobotOutlined, SettingOutlined,
+} from "@ant-design/icons";
 import { useQuery } from "@tanstack/react-query";
-import { Link, NavLink, Navigate, Route, Routes } from "react-router-dom";
+import { Link, NavLink, Navigate, Route, Routes, useLocation, useMatch } from "react-router-dom";
 import { api } from "./api/client";
 import DashboardPage from "./pages/DashboardPage";
 import ExperimentsPage from "./pages/ExperimentsPage";
@@ -8,41 +11,55 @@ import ProjectsPage from "./pages/ProjectsPage";
 import SettingsPage from "./pages/SettingsPage";
 
 const NAV = [
-  { to: "/dashboard", label: "Tổng quan" },
-  { to: "/projects", label: "Dự án" },
-  { to: "/experiments", label: "Thực nghiệm" },
-  { to: "/settings", label: "Cài đặt LLM" },
+  { group: "Làm việc", items: [
+    { to: "/dashboard", label: "Tổng quan", icon: <DashboardOutlined /> },
+    { to: "/projects", label: "Dự án", icon: <FolderOpenOutlined /> },
+    { to: "/experiments", label: "Thực nghiệm", icon: <ExperimentOutlined /> },
+  ] },
+  { group: "Hệ thống", items: [
+    { to: "/settings", label: "Cài đặt LLM", icon: <SettingOutlined /> },
+  ] },
 ];
 
-function BrandMark() {
+const ROOT_TITLE: Record<string, string> = {
+  dashboard: "Tổng quan", projects: "Dự án", experiments: "Thực nghiệm", settings: "Cài đặt LLM",
+};
+
+function Crumbs() {
+  const loc = useLocation();
+  const m = useMatch("/projects/:id");
+  const id = m ? Number(m.params.id) : null;
+  const project = useQuery({ queryKey: ["project", id], queryFn: () => api.project(id!), enabled: !!id });
+  const root = loc.pathname.split("/")[1] || "dashboard";
   return (
-    <svg className="brand-mark" viewBox="0 0 40 40" fill="none" aria-hidden="true">
-      <circle cx="20" cy="20" r="15" stroke="#232b34" strokeWidth="2" />
-      <path d="M20 5a15 15 0 0 1 15 15" stroke="#d4ff3a" strokeWidth="2.5" strokeLinecap="round" />
-      <path d="M20 35a15 15 0 0 1-15-15" stroke="#5ce1e6" strokeWidth="2.5" strokeLinecap="round" />
-      <g className="orbit">
-        <circle cx="35" cy="20" r="3" fill="#d4ff3a" />
-      </g>
-      <rect x="15" y="15" width="10" height="10" rx="1.5" fill="#e7ecef" />
-    </svg>
+    <nav className="crumbs" aria-label="Đường dẫn">
+      <Link to="/dashboard">SpecLoop</Link>
+      <span className="sep">/</span>
+      {id ? (
+        <>
+          <Link to="/projects">Dự án</Link>
+          <span className="sep">/</span>
+          <span className="cur">{project.data?.name ?? `#${id}`}</span>
+        </>
+      ) : <span className="cur">{ROOT_TITLE[root] ?? root}</span>}
+    </nav>
   );
 }
 
-function RailFoot() {
+function StatusPills() {
   const health = useQuery({ queryKey: ["health"], queryFn: api.health, refetchInterval: 15000, retry: 0 });
   const providers = useQuery({ queryKey: ["providers"], queryFn: api.providers, staleTime: 60000 });
   const model = providers.data?.find((p) => p.default)?.models[0];
   const apiOk = health.data?.status === "ok";
   return (
-    <div className="rail-foot">
-      <div className="sig" title="Kết nối tới backend">
+    <div className="topbar-right">
+      <span className="pill" title="Kết nối tới backend">
         <span className={`dot ${health.isLoading ? "" : apiOk ? "on" : "off"}`} />
         API <b>{health.isLoading ? "…" : apiOk ? "sẵn sàng" : "mất kết nối"}</b>
-      </div>
-      <div className="sig" title="Mô hình LLM mặc định (.env)">
-        <span className={`dot ${health.data?.llm_configured ? "on" : ""}`} />
-        LLM <b>{model ?? (health.data ? "chưa cấu hình" : "…")}</b>
-      </div>
+      </span>
+      <span className="pill" title="Mô hình LLM mặc định (.env)">
+        <RobotOutlined /> LLM <b>{model ?? (health.data ? "chưa cấu hình" : "…")}</b>
+      </span>
     </div>
   );
 }
@@ -52,23 +69,32 @@ export default function App() {
     <div className="shell">
       <aside className="rail">
         <Link to="/dashboard" className="brand">
-          <BrandMark />
+          <span className="brand-mark"><ApiOutlined /></span>
           <span>
-            <span className="brand-name">Spec<em>Loop</em></span>
-            <span className="brand-sub">tài liệu → OAS → kiểm thử</span>
+            <span className="brand-name">SpecLoop</span>
+            <span className="brand-sub">Tài liệu → OpenAPI → kiểm thử</span>
           </span>
         </Link>
         <nav className="nav" aria-label="Điều hướng chính">
-          <div className="nav-label">Khu vực</div>
-          {NAV.map((n, i) => (
-            <NavLink key={n.to} to={n.to} className={({ isActive }) => (isActive ? "active" : "")}>
-              <span className="idx">0{i + 1}</span>
-              {n.label}
-            </NavLink>
+          {NAV.map((g) => (
+            <div key={g.group}>
+              <div className="nav-label">{g.group}</div>
+              {g.items.map((n) => (
+                <NavLink key={n.to} to={n.to} className={({ isActive }) => (isActive ? "active" : "")}>
+                  {n.icon}{n.label}
+                </NavLink>
+              ))}
+            </div>
           ))}
         </nav>
-        <RailFoot />
+        <div className="rail-foot">
+          <b>SpecLoop 1.0</b><br />OpenAPI 3.0.3 · SpecLoop-Bench v0.1
+        </div>
       </aside>
+      <header className="topbar">
+        <Crumbs />
+        <StatusPills />
+      </header>
       <main className="main">
         <Routes>
           <Route path="/" element={<Navigate to="/dashboard" replace />} />

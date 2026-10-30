@@ -90,7 +90,7 @@ function Report({ ev }: { ev: Evaluation }) {
           <Col xs={12} md={6} xl={3}><Card size="small"><Statistic title="Precision" value={fmt(l5.micro.precision)} /></Card></Col>
           <Col xs={12} md={6} xl={3}><Card size="small"><Statistic title="Recall" value={fmt(l5.micro.recall)} /></Card></Col>
           <Col xs={12} md={6} xl={3}><Card size="small"><Statistic title="F1 (micro)" value={fmt(l5.micro.f1)} /></Card></Col>
-          <Col xs={12} md={6} xl={3}><Card size="small"><Statistic title="F1 ràng buộc (bỏ type)" value={fmt(l5.constraint_no_type.f1)} valueStyle={{ color: C.lime }} /></Card></Col>
+          <Col xs={12} md={6} xl={3}><Card size="small"><Statistic title="F1 ràng buộc (bỏ type)" value={fmt(l5.constraint_no_type.f1)} valueStyle={{ color: C.primary }} /></Card></Col>
           <Col xs={12} md={6} xl={3}><Card size="small"><Statistic title="Hallucination / Omission" value={`${fmt(l5.hallucination_rate, 2)} / ${fmt(l5.omission_rate, 2)}`} /></Card></Col>
         </>}
       </Row>

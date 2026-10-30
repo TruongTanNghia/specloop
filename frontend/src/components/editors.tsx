@@ -1,4 +1,4 @@
-// Monaco (đóng gói cục bộ, không tải từ CDN) – YamlEditor và DiffView, theme tối "specloop".
+// Monaco (đóng gói cục bộ, không tải từ CDN) – YamlEditor và DiffView, theme sáng "specloop" cùng bảng màu giao diện.
 import Editor, { DiffEditor, loader, type OnMount } from "@monaco-editor/react";
 import * as monaco from "monaco-editor/esm/vs/editor/editor.api";
 import "monaco-editor/esm/vs/basic-languages/yaml/yaml.contribution";
@@ -9,38 +9,30 @@ import { FONT_MONO } from "../theme";
 loader.config({ monaco });
 
 monaco.editor.defineTheme("specloop", {
-  base: "vs-dark",
+  base: "vs",
   inherit: true,
   rules: [
-    { token: "type", foreground: "d4ff3a" }, // khóa YAML
-    { token: "string", foreground: "e7ecef" },
-    { token: "number", foreground: "ffb547" },
-    { token: "keyword", foreground: "5ce1e6" },
-    { token: "comment", foreground: "5b6672", fontStyle: "italic" },
-    { token: "operators", foreground: "8a96a3" },
+    { token: "type", foreground: "0b5cd6" }, // khóa YAML
+    { token: "string", foreground: "1f2937" },
+    { token: "number", foreground: "b45309" },
+    { token: "keyword", foreground: "6d28d9" },
+    { token: "comment", foreground: "6b7280", fontStyle: "italic" },
+    { token: "operators", foreground: "6b7280" },
   ],
   colors: {
-    "editor.background": "#0d1013",
-    "editor.foreground": "#e7ecef",
-    "editorGutter.background": "#0d1013",
-    "editorLineNumber.foreground": "#3b4650",
-    "editorLineNumber.activeForeground": "#8a96a3",
-    "editor.lineHighlightBackground": "#141920",
-    "editor.selectionBackground": "#2b3a14",
-    "editor.inactiveSelectionBackground": "#1d2616",
-    "editorCursor.foreground": "#d4ff3a",
-    "editorIndentGuide.background1": "#1b2229",
-    "editorIndentGuide.activeBackground1": "#2a333d",
-    "editorWidget.background": "#161b21",
-    "editorWidget.border": "#232b34",
-    "scrollbarSlider.background": "#262f3980",
-    "scrollbarSlider.hoverBackground": "#36414dcc",
-    "diffEditor.insertedTextBackground": "#d4ff3a22",
-    "diffEditor.removedTextBackground": "#ff6b4a2a",
-    "diffEditor.insertedLineBackground": "#d4ff3a10",
-    "diffEditor.removedLineBackground": "#ff6b4a14",
-    "diffEditorGutter.insertedLineBackground": "#d4ff3a18",
-    "diffEditorGutter.removedLineBackground": "#ff6b4a1c",
+    "editor.background": "#ffffff",
+    "editor.foreground": "#111827",
+    "editorLineNumber.foreground": "#b4bcc8",
+    "editorLineNumber.activeForeground": "#6b7280",
+    "editor.lineHighlightBackground": "#f3f7fd",
+    "editor.selectionBackground": "#cfe0fb",
+    "editorCursor.foreground": "#0b5cd6",
+    "editorIndentGuide.background1": "#eef1f5",
+    "editorIndentGuide.activeBackground1": "#d5dbe4",
+    "diffEditor.insertedTextBackground": "#1e9e4a33",
+    "diffEditor.removedTextBackground": "#d32f2f2e",
+    "diffEditor.insertedLineBackground": "#1e9e4a14",
+    "diffEditor.removedLineBackground": "#d32f2f12",
   },
 });
 // Font mono tự đóng gói nạp sau khi Monaco đo chữ → đo lại để con trỏ khớp cột.

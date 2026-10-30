@@ -1,8 +1,10 @@
-import { SettingOutlined } from "@ant-design/icons";
+import {
+  AuditOutlined, BranchesOutlined, CheckCircleOutlined, CodeOutlined, ExperimentOutlined, FileTextOutlined, SettingOutlined,
+} from "@ant-design/icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { App, Button, Select, Tabs } from "antd";
 import { useState } from "react";
-import { Link, useParams, useSearchParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import { api, errorText } from "../api/client";
 import { Chip, ErrorAlert } from "../components/common";
 import ProjectForm from "../components/ProjectForm";
@@ -56,34 +58,34 @@ export default function ProjectDetailPage() {
     <>
       <header className="proj-head reveal">
         <div style={{ minWidth: 0 }}>
-          <div className="eyebrow"><Link to="/projects">Dự án</Link><span>/ #{p.id}</span></div>
+          <div className="eyebrow">Dự án #{p.id}</div>
           <h1 className="page-title" data-testid="project-title">{p.name}</h1>
           {p.description && <p className="page-lede">{p.description}</p>}
           <div className="meta-line">
-            <Chip tone={p.base_url ? "cyan" : "muted"} title="Base URL của API cần kiểm thử">{p.base_url ?? "chưa có base URL"}</Chip>
+            <Chip tone={p.base_url ? "blue" : "gray"} mono title="Base URL của API cần kiểm thử">{p.base_url ?? "chưa có base URL"}</Chip>
             <Chip title="Chế độ kiểm thử">chế độ {p.mode}</Chip>
             <Chip title="Chính sách khi mâu thuẫn tài liệu">{p.policy}</Chip>
             <Chip title="Xác thực">xác thực {p.auth_config?.type ?? "none"}{p.has_secret ? " · đã lưu khóa" : ""}</Chip>
             {p.reset_config && <Chip title="Reset SUT trước khi kiểm thử">reset {p.reset_config.method} {p.reset_config.url}</Chip>}
-            <Chip>{p.stats?.documents ?? 0} tài liệu · {p.stats?.versions ?? 0} phiên bản · {p.stats?.pending_proposals ?? 0} đề xuất chờ</Chip>
+            <Chip tone="gray">{p.stats?.documents ?? 0} tài liệu · {p.stats?.versions ?? 0} phiên bản · {p.stats?.pending_proposals ?? 0} đề xuất chờ</Chip>
           </div>
         </div>
         <div className="proj-actions">
-          <span className="lbl">Phiên bản</span>
+          <span className="lbl">Phiên bản đặc tả</span>
           <Select style={{ minWidth: 280 }} value={specId ?? undefined} placeholder="Chưa có phiên bản"
             data-testid="version-select" onChange={(v) => selectSpec(v)}
             options={(specs.data ?? []).map((s) => ({ value: s.id, label: `v${s.version_no} · ${s.label} (#${s.id})` }))} />
-          {current?.model && <Chip tone="muted">{current.model}</Chip>}
+          {current?.model && <Chip tone="gray" mono title="Mô hình đã sinh phiên bản này">{current.model}</Chip>}
           <Button icon={<SettingOutlined />} onClick={() => setEditing(true)}>Cấu hình</Button>
         </div>
       </header>
       <Tabs className="pipeline" activeKey={tab} onChange={(k) => goTab(k)} destroyInactiveTabPane items={[
-        { key: "documents", label: "Tài liệu", children: <DocumentsTab {...ctx} /> },
-        { key: "spec", label: "Đặc tả", children: <SpecTab {...ctx} /> },
-        { key: "evaluation", label: "Đánh giá", children: <EvaluationTab {...ctx} /> },
-        { key: "testing", label: "Kiểm thử", children: <TestingTab {...ctx} /> },
-        { key: "proposals", label: "Sai lệch & đề xuất", children: <ProposalsTab {...ctx} /> },
-        { key: "versions", label: "Phiên bản", children: <VersionsTab {...ctx} /> },
+        { key: "documents", label: "Tài liệu", icon: <FileTextOutlined />, children: <DocumentsTab {...ctx} /> },
+        { key: "spec", label: "Đặc tả", icon: <CodeOutlined />, children: <SpecTab {...ctx} /> },
+        { key: "evaluation", label: "Đánh giá", icon: <CheckCircleOutlined />, children: <EvaluationTab {...ctx} /> },
+        { key: "testing", label: "Kiểm thử", icon: <ExperimentOutlined />, children: <TestingTab {...ctx} /> },
+        { key: "proposals", label: "Sai lệch & đề xuất", icon: <AuditOutlined />, children: <ProposalsTab {...ctx} /> },
+        { key: "versions", label: "Phiên bản", icon: <BranchesOutlined />, children: <VersionsTab {...ctx} /> },
       ]} />
       <ProjectForm open={editing} initial={p} onCancel={() => setEditing(false)} onSubmit={(v) => update.mutate(v)}
         loading={update.isPending} />

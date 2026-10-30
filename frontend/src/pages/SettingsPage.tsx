@@ -13,7 +13,7 @@ export default function SettingsPage() {
   const test = useMutation({ mutationFn: api.llmTest });
   return (
     <>
-      <PageHead eyebrow="Cài đặt" title={<>Mô hình <span className="hl">ngôn ngữ</span></>}
+      <PageHead title="Cài đặt LLM"
         lede="Cấu hình mặc định đọc từ tệp .env của backend. Mọi máy chủ tương thích OpenAI đều dùng được: OpenAI, Gemini, Ollama, LM Studio." />
       <div className="grid-2 reveal" style={{ ...delay(1), marginTop: 0 }}>
         <Panel title="Nhà cung cấp khả dụng" bodyStyle={{ padding: 0 }}>
@@ -21,8 +21,8 @@ export default function SettingsPage() {
           <Table size="small" rowKey="id" pagination={false} dataSource={providers.data ?? []} columns={[
             { title: "Nhà cung cấp", dataIndex: "name" },
             { title: "Base URL", dataIndex: "base_url", render: (v) => v ? <code>{v}</code> : "–" },
-            { title: "Mô hình", dataIndex: "models", render: (m: string[]) => m.map((x) => <Chip key={x} tone="lime">{x}</Chip>) },
-            { title: "Trạng thái", dataIndex: "available", render: (a) => <Chip tone={a ? "lime" : "muted"}>{a ? "sẵn sàng" : "chưa cấu hình"}</Chip> },
+            { title: "Mô hình", dataIndex: "models", render: (m: string[]) => m.map((x) => <Chip key={x} tone="blue" mono>{x}</Chip>) },
+            { title: "Trạng thái", dataIndex: "available", render: (a) => <Chip tone={a ? "green" : "gray"}>{a ? "Sẵn sàng" : "Chưa cấu hình"}</Chip> },
           ]} />
         </Panel>
         <Panel title="Biến môi trường (.env)">
@@ -35,7 +35,7 @@ export default function SettingsPage() {
           </div>
         </Panel>
       </div>
-      <Panel title="Thử kết nối" className="reveal" style={{ ...delay(2), marginTop: 18 }}>
+      <Panel title="Thử kết nối" className="reveal" style={{ ...delay(2), marginTop: 16 }}>
         <Form layout="inline" onFinish={(v) => test.mutate(v)} style={{ gap: 8 }}>
           <Form.Item name="base_url"><Input placeholder="Base URL (để trống = .env)" style={{ width: 300 }} /></Form.Item>
           <Form.Item name="model"><Input placeholder="Mô hình (vd. gpt-4o-mini, fake)" style={{ width: 240 }} /></Form.Item>
@@ -51,11 +51,11 @@ export default function SettingsPage() {
         )}
         <ErrorAlert error={test.error} />
       </Panel>
-      <Panel title="Sử dụng LLM · bảng llm_call" bodyStyle={{ padding: 0 }} className="reveal" style={{ ...delay(3), marginTop: 18 }}>
+      <Panel title="Sử dụng LLM · bảng llm_call" bodyStyle={{ padding: 0 }} className="reveal" style={{ ...delay(3), marginTop: 16 }}>
         <Table size="small" rowKey="model" pagination={false} dataSource={usage.data ?? []} columns={[
-          { title: "Mô hình", dataIndex: "model", render: (m) => <code>{m}</code> }, { title: "Lời gọi", dataIndex: "calls", render: fmtInt },
-          { title: "Cache hit", dataIndex: "cached", render: fmtInt }, { title: "Token vào", dataIndex: "input_tokens", render: fmtInt },
-          { title: "Token ra", dataIndex: "output_tokens", render: fmtInt },
+          { title: "Mô hình", dataIndex: "model", render: (m) => <code>{m}</code> }, { title: "Lời gọi", dataIndex: "calls", align: "right", render: fmtInt },
+          { title: "Cache hit", dataIndex: "cached", align: "right", render: fmtInt }, { title: "Token vào", dataIndex: "input_tokens", align: "right", render: fmtInt },
+          { title: "Token ra", dataIndex: "output_tokens", align: "right", render: fmtInt },
         ]} />
       </Panel>
     </>

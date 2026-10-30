@@ -96,7 +96,7 @@ Tài khoản và phân quyền (FR-18), Alembic, crawl nhiều trang, tích hợ
 
 ## 11. Giao diện
 
-- Theme tối kiểu “phòng điều khiển”: nền than chì, một màu nhấn xanh chanh (`#d4ff3a`) cho trạng thái khớp/hành động chính, san hô (`#ff6b4a`) cho sai lệch/lỗi, cyan cho ngữ cảnh. Token khai báo một chỗ (`frontend/src/theme.ts`) và bơm vào Ant Design qua `ConfigProvider` + biến CSS, nên component AntD và phần tự viết dùng chung bảng màu.
-- Font tự đóng gói qua `@fontsource` (Bricolage Grotesque cho tiêu đề, Be Vietnam Pro cho nội dung, JetBrains Mono cho mã/nhãn) – cả ba có bộ ký tự tiếng Việt; không tải từ CDN để chạy offline/trong docker.
-- Sáu bước của dự án được đánh số 01–06 ngay trên thanh tab để người dùng thấy mình đang ở đâu trong vòng lặp. Monaco dùng theme riêng cùng bảng màu; Swagger UI chỉ có bản sáng nên lớp trong được đảo màu bằng CSS filter, viền ngoài giữ theo theme.
-- Mọi `data-testid` và nhãn mà e2e Playwright dựa vào được giữ nguyên khi làm lại giao diện.
+- Phong cách “phần mềm doanh nghiệp”: nền xám rất nhạt, bề mặt trắng, viền mảnh, bóng nhẹ, xanh dương chủ đạo (`#0b5cd6`), xanh lá/cam/đỏ cho thành công/cảnh báo/lỗi. Khung ứng dụng: menu trái có icon (nhóm Làm việc / Hệ thống), thanh trên có breadcrumb và trạng thái API/LLM, nội dung trên nền xám với thẻ trắng. Token khai báo một chỗ (`frontend/src/theme.ts`) và bơm vào Ant Design qua `ConfigProvider` + biến CSS, nên component AntD và phần tự viết dùng chung bảng màu.
+- Font IBM Plex Sans / IBM Plex Mono tự đóng gói qua `@fontsource` (có bộ ký tự tiếng Việt); không tải từ CDN để chạy offline/trong docker.
+- Tổng quan dùng thẻ KPI có icon, `Steps` 5 bước của vòng lặp, biểu đồ sai lệch theo mã và bảng dự án gần đây; danh sách dự án là bảng dữ liệu có tìm kiếm; chi tiết dự án có đầu trang (tên, chip cấu hình, chọn phiên bản) và tab có icon. Monaco dùng theme sáng cùng bảng màu; Swagger UI dùng nguyên bản sáng.
+- Bảng rộng hơn cột thì cuộn ngang bên trong (`.ant-table-content { overflow-x: auto }`) để không tràn đè lên cột bên cạnh. Mọi `data-testid` và nhãn mà e2e Playwright dựa vào được giữ nguyên khi làm lại giao diện.

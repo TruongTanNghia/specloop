@@ -131,7 +131,7 @@ export default function SpecTab({ project, specs, specId, selectSpec }: TabProps
             {current?.model && <Tag>mô hình: {current.model}</Tag>}
             {current?.note && <Typography.Text type="secondary">{current.note}</Typography.Text>}
             {pointer && <Typography.Text>Phần tử: <code data-testid="pointer">{pointer}</code></Typography.Text>}
-            {pointer && <Badge count={active.length} showZero color={active.length ? C.lime : C.faint} title="Số trích dẫn" />}
+            {pointer && <Badge count={active.length} showZero color={active.length ? C.success : C.faint} title="Số trích dẫn" />}
             {dirty && <Tag color="orange">Có thay đổi chưa lưu</Tag>}
             {parsedDraft.error && <Tag color="red">YAML lỗi</Tag>}
           </Space>

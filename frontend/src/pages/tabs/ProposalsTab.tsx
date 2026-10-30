@@ -135,8 +135,8 @@ export default function ProposalsTab({ project, specId, selectSpec, goTab }: Tab
                 <Typography.Text type="secondary" style={{ fontSize: 12 }}>{r.finding.location}</Typography.Text></> },
               { title: "Độ tin cậy", width: 116, render: (_, r) => <ConfidenceBar value={r.proposal?.confidence ?? r.finding.confidence} width={100} /> },
               { title: "Nhãn / trạng thái", render: (_, r) => <Space direction="vertical" size={3}>
-                {r.proposal ? <Chip tone={TIER_TEXT[r.proposal.tier].tone}>{TIER_TEXT[r.proposal.tier].text}</Chip> : <Chip tone="muted">Chỉ báo cáo</Chip>}
-                {r.finding.doc_conflict && <Chip tone="coral">Mâu thuẫn tài liệu</Chip>}
+                {r.proposal ? <Chip tone={TIER_TEXT[r.proposal.tier].tone}>{TIER_TEXT[r.proposal.tier].text}</Chip> : <Chip tone="gray">Chỉ báo cáo</Chip>}
+                {r.finding.doc_conflict && <Chip tone="red">Mâu thuẫn tài liệu</Chip>}
                 {r.proposal ? <Tag color={STATUS_TEXT[r.proposal.status]?.color}>{STATUS_TEXT[r.proposal.status]?.text ?? r.proposal.status}</Tag> : <Tag>{r.finding.status}</Tag>}
               </Space> },
               { title: "", render: (_, r) => r.proposal && ["pending", "rejected", "accepted", "edited"].includes(r.proposal.status) ? (

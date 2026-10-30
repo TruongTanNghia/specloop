@@ -57,8 +57,8 @@ export default function ExperimentsPage() {
   }));
   return (
     <Space direction="vertical" style={{ width: "100%" }} size="large">
-      <PageHead eyebrow="Thực nghiệm" title={<>Ma trận <span className="hl">API × mô hình × cấu hình</span></>}
-        lede="C0 chỉ LLM · C1 thêm vòng sửa lỗi · C2 thêm tinh chỉnh từ kiểm thử, trên SpecLoop-Bench. Kiểm định Wilcoxon, hiệu chỉnh Holm, khoảng tin cậy bootstrap." />
+      <PageHead title="Thực nghiệm"
+        lede="Ma trận API × mô hình × cấu hình trên SpecLoop-Bench: C0 chỉ LLM · C1 thêm vòng sửa lỗi · C2 thêm tinh chỉnh từ kiểm thử. Kiểm định Wilcoxon, hiệu chỉnh Holm, khoảng tin cậy bootstrap." />
       <Row gutter={16}>
         <Col xs={24} xl={9}>
           <Card size="small" title="Cấu hình ma trận">

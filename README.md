@@ -8,8 +8,8 @@ Tài liệu → OAS v0 → Đánh giá → Kiểm thử → Phát hiện sai l�
 ```
 
 - Backend: Python 3.11 · FastAPI · Pydantic v2 · SQLAlchemy 2 + SQLite · job nền trong tiến trình + SSE.
-- Frontend: React 18 · TypeScript · Vite · Ant Design 5 (theme tối tùy biến) · TanStack Query · Monaco · Swagger UI · Recharts.
-  Giao diện tiếng Việt; font tự đóng gói (Bricolage Grotesque, Be Vietnam Pro, JetBrains Mono – có bộ ký tự tiếng Việt),
+- Frontend: React 18 · TypeScript · Vite · Ant Design 5 (theme tùy biến kiểu phần mềm doanh nghiệp) · TanStack Query ·
+  Monaco · Swagger UI · Recharts. Giao diện tiếng Việt; font IBM Plex Sans/Mono tự đóng gói (có bộ ký tự tiếng Việt),
   không tải gì từ CDN.
 - LLM: một adapter OpenAI-compatible (OpenAI, Gemini, Ollama, LM Studio) + `FakeLLM` cho test/offline.
 - Bộ dữ liệu: `SpecLoop-Bench/` (dùng lại `tools/oas_utils.py`, `extract_facts.py`, `evaluate.py` bằng import).
