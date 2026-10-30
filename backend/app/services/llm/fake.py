@@ -292,7 +292,7 @@ class FakeLLM(BaseLLM):
     def __init__(self):
         super().__init__("fake")
 
-    def _complete(self, system: str, user: str, purpose: str) -> tuple[str, int, int]:
+    def _complete(self, system: str, user: str, purpose: str, schema: dict | None = None) -> tuple[str, int, int]:
         if purpose == "extract":
             ctx = ""
             m = re.search(r"GLOBAL CONTEXT[^\n]*:\n(.*?)\n\nSECTION:\n", user, re.S)

@@ -1,0 +1,10 @@
+# Thực nghiệm LLM thật: Qwen3 8B qua Ollama (cấu hình trong ../.env)
+name: qwen3-8b
+apis: [bookstore-lab]
+models: [qwen3:8b]
+configs: [C0, C1, C2]
+repeats: 1
+doc_variant: original
+use_cache: true
+base_url_overrides:
+  bookstore-lab: http://localhost:8000/v1

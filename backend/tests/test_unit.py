@@ -194,6 +194,42 @@ def test_prober_classification_and_safety():
         check_target("http://127.0.0.1:1/v1", ["example.com"], ["127.0.0.0/8"])
 
 
+def test_parse_llm_json_with_code_fence_inside_evidence():
+    from app.schemas.ir import ResponseIR
+    from app.services.llm.gateway import parse_json_text
+
+    raw = '{"evidence": "Response:\\n```json\\n{ \\"items\\": [] }\\n```", "ok": 1}'
+    assert parse_json_text(raw)["ok"] == 1
+    assert parse_json_text('```json\n{"a": 2}\n```')["a"] == 2
+    assert parse_json_text('Here: {"a": 3} done')["a"] == 3
+    assert [ResponseIR(status=s, evidence="x").status for s in ("200 OK", "HTTP 404", 201, "4xx")] == [
+        "200", "404", "201", "4XX"]
+
+
+def test_repair_drops_undeclared_path_params():
+    spec = {"openapi": "3.0.3", "info": {"title": "t", "version": "1"}, "paths": {"/books": {"post": {
+        "parameters": [{"name": "path", "in": "path", "required": True, "schema": {"type": "string"}}],
+        "responses": {"201": {"description": "ok"}}}}}}
+    fixed, notes = deterministic_fix(spec)
+    assert "parameters" not in fixed["paths"]["/books"]["post"] and notes
+    assert validate_all(fixed) == []
+
+
+def test_null_constraints_and_bad_field_paths_are_dropped():
+    o = build_object([FieldIR(path="id", type="integer", constraints=[ConstraintIR(kind="minimum", value=None,
+                                                                                    evidence="e")]),
+                      FieldIR(path=": ", type="object"),
+                      FieldIR(path="s", type="string", constraints=[ConstraintIR(kind="enum", value=[None, "a"],
+                                                                                  evidence="e")])], 1)
+    assert set(o["properties"]) == {"id", "s"}
+    assert "minimum" not in o["properties"]["id"] and o["properties"]["s"]["enum"] == ["a"]
+    spec = {"openapi": "3.0.3", "info": {"title": "t", "version": "1"}, "paths": {"/x": {"get": {"responses": {
+        "200": {"description": "ok", "content": {"application/json": {"schema": {"type": "object", "properties": {
+            "q": {"type": "integer", "minimum": None}, "e": {"type": "string", "enum": [None]}}}}}}}}}}}
+    fixed, _ = deterministic_fix(spec)
+    assert validate_all(fixed) == []
+
+
 # ------------------------------------------------------------------ M6
 def test_json_patch_and_diff():
     doc = {"a": {"b": 1, "l": [1, 2]}, "r": {"200": {"d": "x"}}}

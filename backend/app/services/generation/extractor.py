@@ -7,7 +7,7 @@ from dataclasses import dataclass, field
 
 from pydantic import ValidationError
 
-from ...schemas.ir import OperationIR, parse_extraction
+from ...schemas.ir import ExtractionResult, OperationIR, parse_extraction
 from ..ingestion.segmenter import build_context
 from ..llm.gateway import BaseLLM, LLMError
 from .prompts import build_extract_prompt
@@ -32,10 +32,12 @@ def extract_one(llm: BaseLLM, chunk, all_chunks, job_id: str | None = None) -> E
     out = ExtractOutcome(getattr(chunk, "id", None), chunk.title)
     system, user = build_extract_prompt(build_context(all_chunks, chunk), chunk.text)
     prompt = user
+    # phân đoạn đã nhận ra chữ ký operation → ép theo OperationIR (không cho trả null); ngược lại cho phép null
+    schema = (OperationIR if chunk.operation_hint else ExtractionResult).model_json_schema()
     for attempt in range(MAX_RETRIES + 1):
         out.attempts = attempt + 1
         try:
-            res = llm.chat_json(system, prompt, purpose="extract", job_id=job_id)
+            res = llm.chat_json(system, prompt, purpose="extract", job_id=job_id, schema=schema)
         except LLMError as e:
             out.error = str(e)
             continue

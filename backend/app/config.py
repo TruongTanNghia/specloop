@@ -29,6 +29,10 @@ class Settings(BaseSettings):
     LLM_CACHE_ENABLED: bool = True
     LLM_TIMEOUT_S: float = 120.0
     LLM_JSON_MODE: bool = True
+    # Mô hình suy luận (qwen3, deepseek-r1…): "none" tắt suy nghĩ – qwen3:4b trên Ollama nhanh hơn ~100 lần
+    LLM_REASONING_EFFORT: str = ""
+    # Ép đầu ra theo JSON Schema (response_format json_schema) – giúp mô hình nhỏ luôn trả JSON hợp lệ
+    LLM_STRUCTURED_OUTPUT: bool = False
 
     # Kiểm thử
     TEST_ALLOWED_NETWORKS: str = "127.0.0.0/8,::1/128,172.16.0.0/12,192.168.0.0/16,10.0.0.0/8"

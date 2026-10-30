@@ -1,6 +1,7 @@
 """Biểu diễn trung gian (IR) do LLM trích xuất cho từng operation (TECH_SPEC Phụ lục B)."""
 from __future__ import annotations
 
+import re
 from typing import Any, Literal
 
 from pydantic import BaseModel, Field, field_validator
@@ -12,6 +13,15 @@ JsonType = Literal["integer", "number", "string", "boolean", "array", "object"]
 
 def _clip(v: Any, n: int = 300) -> Any:
     return v[:n] if isinstance(v, str) else v
+
+
+def _norm_status(v: Any) -> str:
+    """LLM hay trả "200 OK", "HTTP 404", "4xx" → "200", "404", "4XX"."""
+    s = str(v).strip()
+    m = re.search(r"\b([1-5](?:\d\d|XX))\b", s, re.I)
+    if m:
+        return m.group(1).upper()
+    return "default" if s.lower() == "default" else s
 
 
 class ConstraintIR(BaseModel):
@@ -61,7 +71,7 @@ class ResponseIR(BaseModel):
     evidence: str
 
     _clip_ev = field_validator("evidence", mode="before")(lambda v: _clip(v or ""))
-    _status = field_validator("status", mode="before")(lambda v: str(v))
+    _status = field_validator("status", mode="before")(lambda v: _norm_status(v))
 
 
 class DependencyIR(BaseModel):

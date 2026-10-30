@@ -35,6 +35,14 @@ Nguyên tắc: chọn phương án đơn giản nhất chạy được, ghi lạ
 - Schema dùng chung: chỉ đưa vào `components/schemas` các object ≥ 2 thuộc tính xuất hiện ≥ 2 lần (băm JSON chuẩn hóa, bỏ description); tên lấy từ đoạn path số ít (`/books` → `Book`).
 - Bằng chứng gắn tạm bằng khóa `x-ev`/`x-evk` trên nút, thu lại theo JSON Pointer sau khi bố trí xong rồi gỡ khỏi đặc tả. Xuất có thể kèm `x-evidence` (`include_evidence=true`).
 - Vòng sửa lỗi: sửa xác định luôn chạy ở C1 (thêm tham số path thiếu, path param `required`, response mặc định, operationId trùng, mảng thiếu `items`, enum rỗng, exclusive* thiếu min/max). LLM sửa cục bộ ≤ 2 vòng chỉ khi còn lỗi validate và dùng LLM thật (FakeLLM bỏ qua). C0 = phiên bản `generated`; C1 = `repaired` (nếu sửa không thay đổi gì thì C1 = C0).
+- Mô hình suy luận (qwen3…): `LLM_REASONING_EFFORT` gửi `reasoning_effort` qua endpoint OpenAI-compatible (Ollama hiểu
+  `none` = tắt suy nghĩ). `LLM_STRUCTURED_OUTPUT` gửi `response_format=json_schema`: phân đoạn đã có chữ ký operation
+  ép theo `OperationIR` (không cho trả null – mô hình nhỏ hay “lười” trả `{"operation": null}`), phân đoạn khác theo
+  `ExtractionResult`. Cả hai tham số nằm trong khóa cache.
+- Đọc JSON từ LLM: thử nguyên văn trước, chỉ bóc khối ```` ``` ```` khi toàn bộ đầu ra là một khối mã (trích dẫn hay chứa
+  ```` ```json ```` chép từ tài liệu). Mã trạng thái kiểu `"200 OK"` được chuẩn hóa thành `"200"`.
+- Ràng buộc LLM nêu nhưng không có giá trị (`minimum: null`, `enum: [null]`) bị bỏ; thuộc tính có tên không hợp lệ bị bỏ;
+  vòng sửa lỗi xác định xóa tham số path không có trong đường dẫn.
 - Không sinh `securitySchemes` từ trường `security` của IR (thiếu thông tin kiểu xác thực).
 
 ## 4. M3 – Đánh giá

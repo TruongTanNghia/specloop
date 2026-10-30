@@ -163,21 +163,45 @@ Cũng chạy được từ trang **Thực nghiệm** hoặc `POST /api/v1/experi
 
 FakeLLM chỉ là baseline; các số trên không đại diện cho LLM thật.
 
-### LLM thật (tiêu chí nghiệm thu 4) – **chưa đo**
+### LLM thật (tiêu chí nghiệm thu 4) – Qwen3 qua Ollama, máy RTX 3050 Laptop 4 GB
 
-Máy dùng để phát triển không có khóa API hay Ollama/LM Studio nên chưa chạy được. Sau khi điền `.env`:
+Một lần chạy, nhiệt độ 0, tài liệu `original.md` (Bookstore-Lab) và `rendered.md` (Petstore). F1 so với **GT tài liệu**;
+F1 ràng buộc không tính từ khóa `type`. Petstore không có SUT chạy cục bộ nên không có C2.
 
-```bash
-# sửa experiments.example.yaml: models: [<tên mô hình>], apis: [bookstore-lab, petstore3], configs: [C0, C1]
-.venv/Scripts/python -m app.experiments --config experiments.example.yaml
+| API | Mô hình | Cấu hình | Hợp lệ OAS 3.0.3 | Operation | P | R | **F1** | F1 ràng buộc (tài liệu) | F1 ràng buộc (hành vi) | Thời gian sinh |
+|---|---|---|---|---:|---:|---:|---:|---:|---:|---:|
+| bookstore-lab | qwen3:8b (lai CPU/GPU) | C0 / C1 | có | 8/8 | 0,988 | 0,558 | **0,713** | 0,571 | 0,517 | ≈ 27 phút |
+| bookstore-lab | qwen3:8b | C2 (287 request, 2 vòng) | có | 8/8 | 0,988 | 0,569 | **0,722** | 0,601 | 0,545 | + 70 s |
+| bookstore-lab | qwen3-4b-gpu (100% GPU) | C1 | có | 8/8 | 0,899 | 0,281 | **0,428** | 0,269 | 0,215 | ≈ 1,5 phút |
+| petstore3 | qwen3-4b-gpu (100% GPU) | C1 | có | 19/19 | 0,720 | 0,557 | **0,628** | 0,223 | – | ≈ 3,5 phút |
+
+Nhận xét: bản 8B chính xác hơn nhiều (P ≈ 0,99) nhưng không vừa VRAM 4 GB nên 61% chạy trên CPU; bản 4B chạy trọn trên
+GPU, nhanh hơn ~15 lần nhưng bỏ sót nhiều thuộc tính body/response. Petstore chưa chạy với 8B (≈ 80 phút, đẩy CPU kín).
+Kết quả chi tiết: `data/experiments/qwen3-8b-bookstore/`, `data/experiments/qwen3-4b-gpu/`.
+
+#### Chạy Ollama trên GPU nhỏ (đã kiểm chứng trên RTX 3050 4 GB)
+
+1. Qwen3 là mô hình suy luận: **bắt buộc** `LLM_REASONING_EFFORT=none`, nếu không mỗi lời gọi sinh ~15.000 ký tự
+   “suy nghĩ” (470 s thay vì 7 s).
+2. `LLM_STRUCTURED_OUTPUT=true` ép đầu ra theo JSON Schema của OperationIR – mô hình 4B luôn trả JSON hợp lệ.
+3. Để mô hình nằm trọn trong GPU: đặt biến môi trường `OLLAMA_FLASH_ATTENTION=1`, `OLLAMA_KV_CACHE_TYPE=q8_0`, khởi động
+   lại Ollama, rồi `ollama create qwen3-4b-gpu -f ollama/Modelfile.qwen3-4b-gpu` (ép mọi lớp lên GPU, ngữ cảnh 4096).
+   Kiểm tra bằng `ollama ps` → cột PROCESSOR phải là `100% GPU`.
+4. `.env` mẫu cho máy này:
+
+```env
+LLM_BASE_URL=http://localhost:11434/v1
+LLM_API_KEY=ollama
+LLM_MODEL=qwen3-4b-gpu          # hoặc qwen3:8b nếu chấp nhận chậm và tốn CPU
+LLM_REASONING_EFFORT=none
+LLM_STRUCTURED_OUTPUT=true
+LLM_MAX_CONCURRENCY=1
+LLM_TIMEOUT_S=300
+DOCKER_LLM_BASE_URL=http://host.docker.internal:11434/v1
 ```
 
-rồi ghi F1 so với GT tài liệu vào bảng dưới (cột “F1 (GT tài liệu)” trong `summary.md`):
-
-| API | Mô hình | Hợp lệ OAS 3.0.3 | F1 (GT tài liệu) | F1 ràng buộc (GT tài liệu) |
-|---|---|---|---:|---:|
-| bookstore-lab | _(điền)_ | | | |
-| petstore3 | _(điền)_ | | | |
+Chạy lại thực nghiệm: `cd backend && .venv/Scripts/python -m app.experiments --config experiments.qwen-gpu.yaml`
+(hoặc `experiments.qwen.yaml` cho qwen3:8b).
 
 ## 8. API backend (tóm tắt, tiền tố `/api/v1`)
 

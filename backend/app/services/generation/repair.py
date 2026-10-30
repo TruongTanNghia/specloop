@@ -33,6 +33,10 @@ def deterministic_fix(spec: dict) -> tuple[dict, list[str]]:
             opk = f"{method.upper()} {path}"
             params = op.setdefault("parameters", [])
             declared = {p.get("name") for p in oas_utils.merged_parameters(spec, op, item) if p.get("in") == "path"}
+            for p in list(params):
+                if isinstance(p, dict) and p.get("in") == "path" and p.get("name") not in tmpl:
+                    params.remove(p)
+                    notes.append(f"{opk}: bỏ tham số path '{p.get('name')}' không có trong đường dẫn")
             for v in tmpl:
                 if v not in declared:
                     params.append({"name": v, "in": "path", "required": True, "schema": {"type": "string"}})
@@ -68,6 +72,14 @@ def deterministic_fix(spec: dict) -> tuple[dict, list[str]]:
 
 def _fix_schemas(node, notes, pointer=""):
     if isinstance(node, dict):
+        for kw in ("minimum", "maximum", "minLength", "maxLength", "minItems", "maxItems", "pattern", "format",
+                   "default", "multipleOf"):
+            if kw in node and node[kw] is None:
+                node.pop(kw)
+                notes.append(f"{pointer}: bỏ {kw} rỗng (null)")
+        if isinstance(node.get("enum"), list) and None in node["enum"] and node.get("nullable") is not True:
+            node["enum"] = [x for x in node["enum"] if x is not None]
+            notes.append(f"{pointer}: bỏ null khỏi enum")
         if node.get("type") == "array" and "items" not in node:
             node["items"] = {}
             notes.append(f"{pointer}: thêm items cho mảng")

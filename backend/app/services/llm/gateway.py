@@ -39,16 +39,21 @@ class LLMResult:
 
 def parse_json_text(text: str) -> Any:
     t = text.strip()
-    fence = re.search(r"```(?:json)?\s*(.*?)```", t, re.S)
-    if fence:
-        t = fence.group(1).strip()
-    try:
+    try:  # đọc nguyên văn trước: trích dẫn trong JSON có thể chứa ``` chép từ tài liệu
         return json.loads(t)
     except json.JSONDecodeError:
-        a, b = t.find("{"), t.rfind("}")
-        if a >= 0 and b > a:
-            return json.loads(t[a:b + 1])
-        raise
+        pass
+    if t.startswith("```"):
+        fence = re.match(r"```(?:json)?\s*(.*?)```\s*$", t, re.S)
+        if fence:
+            try:
+                return json.loads(fence.group(1).strip())
+            except json.JSONDecodeError:
+                pass
+    a, b = t.find("{"), t.rfind("}")
+    if a >= 0 and b > a:
+        return json.loads(t[a:b + 1])
+    raise json.JSONDecodeError("không tìm thấy đối tượng JSON", t, 0)
 
 
 _semaphores: dict[int, threading.BoundedSemaphore] = {}
@@ -62,6 +67,8 @@ def _semaphore(n: int) -> threading.BoundedSemaphore:
 
 class BaseLLM:
     provider = "base"
+    variant = ""  # tham số ảnh hưởng đầu ra (vd. reasoning_effort) – đưa vào khóa cache
+    structured = False
 
     def __init__(self, model: str):
         self.model = model
@@ -70,11 +77,15 @@ class BaseLLM:
         self.sem = _semaphore(max(1, s.LLM_MAX_CONCURRENCY))
 
     # Lớp con cài đặt: trả về (text, input_tokens, output_tokens)
-    def _complete(self, system: str, user: str, purpose: str) -> tuple[str, int, int]:
+    def _complete(self, system: str, user: str, purpose: str, schema: dict | None = None) -> tuple[str, int, int]:
         raise NotImplementedError
 
-    def chat_json(self, system: str, user: str, *, purpose: str = "extract", job_id: str | None = None) -> LLMResult:
-        key = hashlib.sha256(f"{self.provider}|{self.model}|{system}\n---\n{user}".encode()).hexdigest()
+    def chat_json(self, system: str, user: str, *, purpose: str = "extract", job_id: str | None = None,
+                  schema: dict | None = None) -> LLMResult:
+        """schema: JSON Schema ép đầu ra (structured output) khi LLM_STRUCTURED_OUTPUT bật."""
+        tag = f"|schema={schema.get('title')}" if schema and self.structured else ""
+        key = hashlib.sha256(
+            f"{self.provider}|{self.model}{self.variant}{tag}|{system}\n---\n{user}".encode()).hexdigest()
         if self.cache_enabled:
             with session_scope() as db:
                 hit = db.get(LLMCache, key)
@@ -89,7 +100,7 @@ class BaseLLM:
         text, tin, tout = "", 0, 0
         try:
             with self.sem:
-                text, tin, tout = self._complete(system, user, purpose)
+                text, tin, tout = self._complete(system, user, purpose, schema)
         except Exception as e:  # noqa: BLE001
             err = f"{type(e).__name__}: {e}"
         latency = (time.perf_counter() - t0) * 1000
@@ -122,23 +133,34 @@ class OpenAICompatLLM(BaseLLM):
         self.client = OpenAI(base_url=base_url, api_key=api_key or "not-needed", timeout=s.LLM_TIMEOUT_S,
                              max_retries=2)
         self.json_mode = s.LLM_JSON_MODE
+        self.reasoning_effort = s.LLM_REASONING_EFFORT.strip()
+        self.structured = s.LLM_STRUCTURED_OUTPUT
+        self.variant = f"|re={self.reasoning_effort}" if self.reasoning_effort else ""
         self.provider = _provider_name(base_url)
 
-    def _complete(self, system: str, user: str, purpose: str) -> tuple[str, int, int]:
+    def _complete(self, system: str, user: str, purpose: str, schema: dict | None = None) -> tuple[str, int, int]:
         kwargs: dict[str, Any] = {
             "model": self.model, "temperature": 0,
             "messages": [{"role": "system", "content": system}, {"role": "user", "content": user}],
         }
-        if self.json_mode:
+        if self.structured and schema:
+            kwargs["response_format"] = {"type": "json_schema",
+                                         "json_schema": {"name": schema.get("title") or "output", "schema": schema}}
+        elif self.json_mode:
             kwargs["response_format"] = {"type": "json_object"}
+        if self.reasoning_effort:
+            kwargs["extra_body"] = {"reasoning_effort": self.reasoning_effort}
         try:
             resp = self.client.chat.completions.create(**kwargs)
-        except Exception as e:  # một số máy chủ không hỗ trợ response_format
-            if self.json_mode and "response_format" in str(e).lower():
-                kwargs.pop("response_format")
-                resp = self.client.chat.completions.create(**kwargs)
+        except Exception as e:  # một số máy chủ không hỗ trợ response_format / reasoning_effort
+            msg = str(e).lower()
+            if "response_format" in msg or "json_schema" in msg:
+                kwargs.pop("response_format", None)
+            elif self.reasoning_effort and "reasoning" in msg:
+                kwargs.pop("extra_body", None)
             else:
                 raise
+            resp = self.client.chat.completions.create(**kwargs)
         text = resp.choices[0].message.content or ""
         usage = getattr(resp, "usage", None)
         tin = getattr(usage, "prompt_tokens", 0) or 0

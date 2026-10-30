@@ -90,6 +90,10 @@ def apply_constraints(schema: dict, constraints: list[ConstraintIR], chunk_id) -
     typ = schema.get("type")
     for c in constraints:
         k, v = c.kind, c.value
+        if v is None and k not in ("nullable", "uniqueItems"):
+            continue  # LLM nêu loại ràng buộc nhưng không có giá trị → không bịa
+        if k == "enum" and isinstance(v, list):
+            v = [x for x in v if x is not None]
         if k in ("exclusiveMinimum", "exclusiveMaximum"):
             base = "minimum" if k == "exclusiveMinimum" else "maximum"
             if isinstance(v, bool):
@@ -148,8 +152,8 @@ def build_object(fields: list[FieldIR], chunk_id) -> dict:
     root: dict = {"type": "object", "properties": {}}
     for f in fields:
         segs = [s for s in re.split(r"\.", f.path.strip()) if s]
-        if not segs:
-            continue
+        if not segs or not all(re.fullmatch(r"[\w\-$@]*(\[\])?", s) for s in segs):
+            continue  # đường dẫn thuộc tính không hợp lệ (vd. ": ") – bỏ
         node = root
         parent: dict | None = None
         name = None

@@ -1,0 +1,7 @@
+# Qwen3 4B chạy trọn trên GPU 4 GB (RTX 3050 Laptop): ép mọi lớp lên GPU, ngữ cảnh 4096.
+# Tạo: ollama create qwen3-4b-gpu -f ollama/Modelfile.qwen3-4b-gpu
+# Nên bật thêm (biến môi trường của Ollama): OLLAMA_FLASH_ATTENTION=1, OLLAMA_KV_CACHE_TYPE=q8_0
+FROM qwen3:4b
+PARAMETER num_gpu 99
+PARAMETER num_ctx 4096
+PARAMETER temperature 0
