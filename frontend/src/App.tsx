@@ -1,9 +1,8 @@
-import {
-  ApiOutlined, DashboardOutlined, ExperimentOutlined, FolderOpenOutlined, RobotOutlined, SettingOutlined,
-} from "@ant-design/icons";
+import { DashboardOutlined, ExperimentOutlined, FolderOpenOutlined, RobotOutlined, SettingOutlined } from "@ant-design/icons";
 import { useQuery } from "@tanstack/react-query";
 import { Link, NavLink, Navigate, Route, Routes, useLocation, useMatch } from "react-router-dom";
 import { api } from "./api/client";
+import { LogoMark } from "./components/Logo";
 import DashboardPage from "./pages/DashboardPage";
 import ExperimentsPage from "./pages/ExperimentsPage";
 import ProjectDetailPage from "./pages/ProjectDetailPage";
@@ -69,9 +68,9 @@ export default function App() {
     <div className="shell">
       <aside className="rail">
         <Link to="/dashboard" className="brand">
-          <span className="brand-mark"><ApiOutlined /></span>
+          <LogoMark size={34} className="brand-mark" />
           <span>
-            <span className="brand-name">SpecLoop</span>
+            <span className="brand-name">Spec<em>Loop</em></span>
             <span className="brand-sub">Tài liệu → OpenAPI → kiểm thử</span>
           </span>
         </Link>
