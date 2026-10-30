@@ -16,6 +16,8 @@ from .config import get_settings
 from .db import init_db
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s %(message)s")
+for _noisy in ("httpx", "httpcore", "openai"):
+    logging.getLogger(_noisy).setLevel(logging.WARNING)  # mỗi probe là một request – không ghi log từng cái
 PROBLEM = "application/problem+json"
 
 

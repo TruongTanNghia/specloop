@@ -1,0 +1,49 @@
+# docker compose up --build
+#   Giao diện:     http://localhost:3000
+#   Backend API:   http://localhost:8001/api/v1  (tài liệu: http://localhost:8001/docs)
+#   Bookstore-Lab: http://localhost:8000/v1      (trong mạng docker: http://bookstore-lab:8000/v1)
+services:
+  bookstore-lab:
+    build: ./SpecLoop-Bench/apis/bookstore-lab/sut
+    environment:
+      BOOKSTORE_ADMIN_TOKEN: reset-me
+    ports:
+      - "8000:8000"
+
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    environment:
+      SECRET_KEY: ${SECRET_KEY:-change-me-in-production}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3000,http://localhost:5173}
+      LLM_BASE_URL: ${LLM_BASE_URL:-}
+      LLM_API_KEY: ${LLM_API_KEY:-}
+      LLM_MODEL: ${LLM_MODEL:-}
+      LLM_MAX_CONCURRENCY: ${LLM_MAX_CONCURRENCY:-4}
+      LLM_CACHE_ENABLED: ${LLM_CACHE_ENABLED:-true}
+      TEST_ALLOWED_NETWORKS: ${TEST_ALLOWED_NETWORKS:-127.0.0.0/8,::1/128,172.16.0.0/12,192.168.0.0/16,10.0.0.0/8}
+      TEST_SANDBOX_MAX_RPS: ${TEST_SANDBOX_MAX_RPS:-5}
+      TEST_PUBLIC_MAX_RPS: ${TEST_PUBLIC_MAX_RPS:-1}
+      TEST_SANDBOX_BUDGET: ${TEST_SANDBOX_BUDGET:-150}
+      TEST_PUBLIC_BUDGET: ${TEST_PUBLIC_BUDGET:-30}
+      TEST_TIMEOUT_S: ${TEST_TIMEOUT_S:-10}
+      SUT_BOOKSTORE_LAB: http://bookstore-lab:8000/v1   # thực nghiệm C2 gọi SUT trong mạng docker
+    extra_hosts:
+      - "host.docker.internal:host-gateway"   # để gọi Ollama/LM Studio chạy trên máy host
+    volumes:
+      - specloop-data:/data
+    ports:
+      - "8001:8000"
+    depends_on:
+      - bookstore-lab
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+
+volumes:
+  specloop-data:

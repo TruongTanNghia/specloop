@@ -1,0 +1,10 @@
+# Cấu hình mẫu cho: python -m app.experiments --config experiments.example.yaml
+name: bookstore-petstore
+apis: [bookstore-lab, petstore3]   # hoặc [all]
+models: [fake]                      # thêm tên mô hình thật, vd. gpt-4o-mini / qwen2.5:7b-instruct (dùng LLM_* trong .env)
+configs: [C0, C1, C2]
+repeats: 3
+doc_variant: original               # original | rendered | ablated (thiếu bản original thì dùng rendered)
+max_iter: 3
+base_url_overrides:
+  bookstore-lab: http://localhost:8000/v1

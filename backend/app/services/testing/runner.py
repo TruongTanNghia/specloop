@@ -103,8 +103,14 @@ def run_test(test_run_id: int, ctx: JobContext | None = None) -> dict:
             recorder.commit()  # nhả khóa ghi SQLite trước khi job cập nhật tiến trình
             ctx.update(test_run_id=test_run_id, **kw)
 
+    msg_llm = None
+    if cfg.get("use_llm_messages") and s.llm_configured:
+        from ..llm.gateway import get_llm
+
+        msg_llm = get_llm()
     eng_cfg = EngineConfig(strategies=set(cfg.get("strategies") or EngineConfig().strategies),
-                           repeats=int(cfg.get("repeats") or 3), mode=mode, operations=cfg.get("operations"))
+                           repeats=int(cfg.get("repeats") or 3), mode=mode, operations=cfg.get("operations"),
+                           llm=msg_llm)
     eng = Engine(spec, prober, eng_cfg, progress)
     status, error = "succeeded", None
     try:

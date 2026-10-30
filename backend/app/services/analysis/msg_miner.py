@@ -152,6 +152,32 @@ def _ref(m):
     return [Hint(m.group("p"), "referential", True)]
 
 
+def llm_hints(message: str | None, param: str, llm) -> list[Hint]:
+    """Tầng 2: hỏi LLM khi regex không khớp. Kết quả chỉ là giả thuyết – nơi gọi phải kiểm chứng bằng probe."""
+    if not message or llm is None:
+        return []
+    from ..generation.prompts import SYSTEM_MESSAGE
+    from ..llm.gateway import LLMError
+
+    try:
+        res = llm.chat_json(SYSTEM_MESSAGE, f"PARAMETER: {param}\nERROR MESSAGE: {message[:500]}", purpose="message")
+    except LLMError:
+        return []
+    d = res.data if isinstance(res.data, dict) else {}
+    kind = d.get("kind")
+    if not kind or kind == "none" or (d.get("param") and str(d["param"]).lower() != param.lower()):
+        return []
+    value = d.get("value")
+    if kind in ("minimum", "maximum", "minLength", "maxLength", "minItems", "maxItems"):
+        try:
+            value = _num(str(value))
+        except ValueError:
+            return []
+    if kind == "enum" and isinstance(value, str):
+        value = _vals(value)
+    return [Hint(param, kind, value, source="llm")]
+
+
 REFERENTIAL_RE = re.compile(r"does not refer to|does not exist|not found|no such|unknown \w+ id", re.I)
 
 

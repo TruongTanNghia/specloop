@@ -13,8 +13,8 @@ from dataclasses import dataclass, field
 from typing import Any
 
 from ..analysis import boundary as bd
-from ..analysis.confidence import R_MESSAGE_REGEX, noisy_or, wilson_lower
-from ..analysis.msg_miner import hints_for, is_referential, mine
+from ..analysis.confidence import R_MESSAGE_LLM, R_MESSAGE_REGEX, noisy_or, wilson_lower
+from ..analysis.msg_miner import hints_for, is_referential, llm_hints, mine
 from ..analysis.schema_check import check, get_pointer, json_type
 from ..versioning.core import has_value
 from .opmodel import (
@@ -68,6 +68,7 @@ class EngineConfig:
     int_cap: float = 10 ** 9
     len_cap: int = 4096
     items_cap: int = 256
+    llm: Any = None  # LLM cho tầng 2 khai thác thông báo lỗi (tùy chọn)
 
 
 def _ids(obs_list) -> list[int]:
@@ -423,6 +424,8 @@ class OpRunner:
         return r
 
     def gen(self, t: Target) -> Any:
+        if t.location == "path" and not t.type and not {"example", "default", "enum", "pattern"} & set(t.schema):
+            return 1  # tham số path không khai báo kiểu: id dạng số là phổ biến nhất
         v = gen_value(t.schema, self.e.spec)
         if t.location in ("query", "path", "header") and isinstance(v, (dict, list)) and t.type != "array":
             return "sample"
@@ -719,8 +722,12 @@ class OpRunner:
                 continue
             msg = obs[0].message
             msg_vals = None
-            for h in hints_for(msg, t.name):
-                if h.kind == "enum":
+            msg_rate = R_MESSAGE_REGEX
+            hints = hints_for(msg, t.name)
+            if not hints and self.cfg.llm is not None:
+                hints, msg_rate = llm_hints(msg, t.name, self.cfg.llm), R_MESSAGE_LLM
+            for h in hints:
+                if h.kind == "enum" and isinstance(h.value, list):
                     msg_vals = [int(x) if ints and re.fullmatch(r"-?\d+", str(x)) else x for x in h.value]
             removed, accepted, contra = [], [], []
             support = list(obs)
@@ -750,7 +757,7 @@ class OpRunner:
                 new = [v for v in enum if v not in removed] + accepted
                 channels = {"probe": _probe_channel(len(support), len(contra))}
                 if msg_vals is not None and set(map(str, msg_vals)) == set(map(str, new)):
-                    channels["error_message"] = R_MESSAGE_REGEX
+                    channels["error_message"] = msg_rate
                 self.e.add(FindingDraft(
                     "D5", self.om.key, t.label, "enum", t.schema_ptr + "/enum",
                     f"{self.om.key}: enum của '{t.name}' khác thực tế – khai báo {enum}, thực tế {new}"
@@ -761,7 +768,7 @@ class OpRunner:
             else:
                 ch = {"probe": _probe_channel(len(support))}
                 if msg_vals is not None and set(map(str, msg_vals)) == set(map(str, enum)):
-                    ch["error_message"] = R_MESSAGE_REGEX
+                    ch["error_message"] = msg_rate
                 self.e.verify(self.om, t.label, "enum", len(support), message=msg, channels=ch)
 
     def wrong_type_values(self, t: Target) -> list[Any]:
@@ -977,6 +984,12 @@ class OpRunner:
                     if h.kind == want_kw and h.value == observed:
                         channels["error_message"] = R_MESSAGE_REGEX
                         msg_used = m
+            if "error_message" not in channels and msgs and self.cfg.llm is not None:
+                # tầng 2: giả thuyết LLM chỉ được tính khi trùng biên đã dò được bằng probe
+                for h in llm_hints(msgs[-1], t.name, self.cfg.llm):
+                    if h.kind == want_kw and h.value == observed:
+                        channels["error_message"] = R_MESSAGE_LLM
+                        msg_used = msgs[-1]
         doc_conflict = declared is not None
         self.e.add(FindingDraft(code, self.om.key, t.label, kw, f"{sp}/{kw}", summary,
                                 {"declared": declared, "declared_exclusive": declared_ex, "observed": observed,

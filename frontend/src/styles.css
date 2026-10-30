@@ -1,0 +1,14 @@
+body { margin: 0; background: #f5f7fa; }
+.ev-doc { white-space: pre-wrap; font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: 12px;
+  line-height: 1.55; background: #fff; padding: 10px; border: 1px solid #eee; border-radius: 6px; overflow: auto; }
+.ev-mark { background: #fff3c4; border-radius: 2px; }
+.ev-mark.active { background: #ffd666; outline: 2px solid #fa8c16; }
+.chunk-card.global { border-left: 4px solid #1f6feb; }
+.chunk-card.op { border-left: 4px solid #52c41a; }
+.md-preview { background: #fff; padding: 12px 16px; border: 1px solid #eee; border-radius: 6px; max-height: 70vh; overflow: auto; }
+.md-preview table { border-collapse: collapse; }
+.md-preview td, .md-preview th { border: 1px solid #ddd; padding: 2px 6px; }
+.md-preview pre { background: #f6f8fa; padding: 8px; overflow: auto; }
+.swagger-box { background: #fff; border: 1px solid #eee; border-radius: 6px; max-height: 620px; overflow: auto; }
+.swagger-box .swagger-ui .info { margin: 10px 0; }
+.patch-op { font-family: ui-monospace, Consolas, monospace; font-size: 12px; }

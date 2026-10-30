@@ -15,7 +15,7 @@ from app.services.generation.assembler import assemble, build_object, normalize_
 from app.services.generation.repair import deterministic_fix
 from app.services.ingestion.segmenter import find_signatures, normalize_markdown, segment
 from app.services.testing.opmodel import build_models, gen_from_pattern, gen_value
-from app.services.testing.prober import classify, check_target, SafetyError
+from app.services.testing.prober import SafetyError, check_target, classify
 from app.services.versioning.core import apply_patch, diff_patch
 
 

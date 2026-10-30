@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import csv
 import json
+import os
 import random
 import re
 import statistics
@@ -112,7 +113,9 @@ def run_matrix(cfg: dict, out_dir: Path, ctx: JobContext | None = None, log=prin
             else None
         env = meta.get("environment") or {}
         scope = env.get("test_scope") or "none"
-        base_url = overrides.get(api) or env.get("base_url")
+        # ghi đè: cấu hình > biến môi trường SUT_<API_ID> (vd. SUT_BOOKSTORE_LAB trong docker) > meta.yaml
+        base_url = overrides.get(api) or os.environ.get("SUT_" + re.sub(r"\W", "_", api).upper()) or env.get(
+            "base_url")
         reset_cfg, reset_headers = parse_reset(env.get("reset"))
         for model in models:
             for rep in range(1, repeats + 1):
