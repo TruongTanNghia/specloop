@@ -19,20 +19,39 @@ phát hiện sai lệch ràng buộc từ phản hồi kiểm thử, **RQ3** m�
 | `bookstore-lab` | A | Docker cục bộ | đầy đủ | 8 | 10 | 98 | 285 | có | 10 | chính xác |
 | `fdic` | B | Công khai | chỉ đọc | 6 | 73 | 104 | 3977 | – | – | chờ xác minh |
 | `genome-nexus` | B | Công khai | chỉ đọc | 23 | 34 | 572 | 3984 | – | – | chờ xác minh |
+| `httpbin` | A | Docker cục bộ | đầy đủ | 78 | 63 | 59 | 373 | – | 1 | chờ xác minh |
+| `jikan` | B | Công khai | chỉ đọc | 100 | 221 | 673 | 5112 | – | – | chờ xác minh |
 | `language-tool` | B | Công khai | chỉ đọc | 2 | 0 | 6 | 39 | – | – | chờ xác minh |
+| `nws-weather` | B | Công khai | chỉ đọc | 69 | 185 | 1752 | 5412 | – | – | chờ xác minh |
 | `ohsome` | B | Công khai | chỉ đọc | 122 | 1488 | 2262 | 11642 | – | – | chờ xác minh |
 | `omdb` | B | Công khai | chỉ đọc | 1 | 9 | 9 | 112 | – | – | chờ xác minh |
+| `opendota` | B | Công khai | chỉ đọc | 55 | 235 | 142 | 2018 | – | – | chờ xác minh |
 | `petstore3` | A | Docker cục bộ | đầy đủ | 19 | 17 | 98 | 521 | – | 4 | chờ xác minh |
+| `pokeapi` | B | Công khai | chỉ đọc | 102 | 200 | 2291 | 5643 | – | – | chờ xác minh |
+| `postcodes-io` | B | Công khai | chỉ đọc | 11 | 14 | 1067 | 2274 | – | – | chờ xác minh |
+| `qdrant` | A | Docker cục bộ | đầy đủ | 69 | 160 | 3011 | 7874 | – | 195 | chờ xác minh |
 | `realworld-conduit` | A | Docker cục bộ | đầy đủ | 19 | 19 | 309 | 924 | có | 8 | chờ xác minh |
 | `rest-countries` | B | Ngoại tuyến | không | 21 | 42 | 19 | 166 | – | – | chờ xác minh |
-| **Tổng (9 API)** | | | | **221** | **1692** | **3477** | **21650** | | **22** | |
+| `spaceflight-news` | B | Công khai | chỉ đọc | 7 | 73 | 169 | 535 | – | – | chờ xác minh |
+| `spring-petclinic` | A | Docker cục bộ | đầy đủ | 37 | 31 | 2137 | 4355 | – | 72 | chờ xác minh |
+| `typesense` | A | Docker cục bộ | đầy đủ | 79 | 72 | 594 | 4566 | – | 26 | chờ xác minh |
+| `wikimedia-rest` | B | Công khai | chỉ đọc | 49 | 90 | 322 | 1981 | – | – | chờ xác minh |
+| **Tổng (20 API)** | | | | **877** | **3036** | **15694** | **61793** | | **316** | |
 
 \* Ràng buộc không tính từ khóa `type`. Số liệu chi tiết: `stats.csv`, `manifest.json`.
 
-- **Nhóm A** – API chạy cục bộ, được phép gọi mọi phương thức. `bookstore-lab` do nhóm tự xây dựng, có **13 sai lệch
-  tài liệu – cài đặt được cài cắm có chủ đích** (mã D0–D9) và **10 ràng buộc đối chứng**, kèm GT hành vi chính xác.
-- **Nhóm B** – API công khai, chỉ gọi phương thức đọc với tốc độ thấp. Đặc tả lấy từ kho công bố của NLP2REST (ISSTA 2023).
+- **Nhóm A** (7 API) – chạy cục bộ bằng Docker, được phép gọi mọi phương thức. `bookstore-lab` do nhóm tự xây dựng, có
+  **13 sai lệch tài liệu – cài đặt được cài cắm có chủ đích** (mã D0–D9) và **10 ràng buộc đối chứng**, kèm GT hành vi
+  chính xác. Các API còn lại là phần mềm mở có đặc tả chính thức, thuộc các lĩnh vực khác nhau: Petstore (mẫu chuẩn),
+  RealWorld Conduit (blog), Spring PetClinic (nghiệp vụ CRUD), httpbin (dịch vụ thử HTTP), Typesense (máy tìm kiếm),
+  Qdrant (cơ sở dữ liệu vector).
+- **Nhóm B** (13 API) – API công khai, chỉ gọi phương thức đọc với tốc độ thấp (≤ 1 req/s). Sáu API đầu lấy đặc tả từ
+  kho NLP2REST (ISSTA 2023); bảy API thêm đợt 11/2026 lấy đặc tả do chính nhà cung cấp công bố (thời tiết NWS, PokéAPI,
+  OpenDota, Spaceflight News, Jikan, Postcodes.io, Wikimedia REST) – đa dạng về cỡ (7–102 operation) và kiểu ràng buộc
+  (pattern, enum, min/max, phân trang).
 - `rest-countries`: nhà cung cấp đã gỡ các phiên bản v2/v3 nên chỉ dùng cho RQ1 (đánh giá trích xuất).
+- Mỗi API ghi rõ giấy phép, URL đặc tả gốc, ngày lấy và các bước chuẩn hóa trong `meta.yaml`; bản gốc chưa chuẩn hóa
+  nằm trong `source/`.
 
 ## 2. Cấu trúc thư mục
 
@@ -96,6 +115,15 @@ python tools/check_connectivity.py --update-meta
 > **Windows:** các lệnh nhiều dòng dùng dấu `\` để xuống dòng là cú pháp bash. Trên PowerShell hãy thay `\` bằng
 > dấu backtick, hoặc viết cả lệnh trên một dòng.
 
+Chạy các API nhóm A bằng Docker (cổng ghi trong `docker-compose.sut.yml` và `meta.yaml` của từng API):
+
+```bash
+docker compose -f docker-compose.sut.yml up -d          # bookstore-lab 8000, petstore3 8080, spring-petclinic 9966,
+                                                         # httpbin 8800, typesense 8108 (khóa: specloop), qdrant 6343
+export TYPESENSE_API_KEY=specloop                        # PowerShell: $env:TYPESENSE_API_KEY="specloop"
+python tools/check_connectivity.py --update-meta         # mỗi API trả 2xx -> connectivity_checked: true
+```
+
 Chạy Bookstore-Lab và test hành vi:
 
 ```bash
@@ -155,8 +183,13 @@ sinh `meta.yaml`, `facts.jsonl`, `rendered.md`, cập nhật `manifest.json` r�
 
 ### 5.4. Trường hợp đặc biệt
 
-- **Swagger 2.0**: chuyển sang OpenAPI 3 trước, ví dụ `npx swagger2openapi swagger.yaml -o openapi.yaml`
-  (cần Node.js) hoặc dùng https://converter.swagger.io, rồi chạy `add_api.py` với tệp đã chuyển.
+- **Swagger 2.0**: chuyển sang OpenAPI 3 trước bằng công cụ kèm theo (không cần Node.js):
+  `python tools/swagger2_to_oas3.py swagger.json -o openapi.yaml` (body/formData → requestBody, definitions →
+  components, host/basePath → servers), rồi chạy `add_api.py` với tệp đã chuyển. `httpbin` được thêm theo cách này.
+- **Đặc tả gốc chưa hợp lệ OAS 3.0** (gặp ở nhiều đặc tả tự sinh): tên kiểu không chuẩn (`int`, `float`), số hoặc
+  boolean viết dạng chuỗi (`minimum: '1'`, `default: 'false'`), regex dùng lớp Unicode `\p{L}`, thiếu khai báo tham số
+  path, trường lạ trong `info.contact`, từ khóa JSON Schema 2020-12 (`patternProperties`, `if/then`…). Sửa tối thiểu
+  để hợp lệ và **ghi từng thay đổi vào `source.normalization`** của `meta.yaml` (xem các API thêm đợt 11/2026).
 - **Tài liệu gốc chỉ có trên web**: mở trang docs, lưu dạng “Webpage, HTML only” (Ctrl+S) hoặc sao chép nội dung
   sang `docs/original.md`, ghi URL và ngày lấy vào `meta.yaml`.
 - **Xác minh GT hành vi**: khi đã kiểm chứng hành vi thật (bằng probe/thủ công), tạo `ground_truth/behavior_openapi.yaml`,
@@ -171,7 +204,8 @@ sinh `meta.yaml`, `facts.jsonl`, `rendered.md`, cập nhật `manifest.json` r�
 
 ## 6. Kiểm chứng ban đầu
 
-- `validate_dataset.py`: 9/9 API đạt; mọi GT hợp lệ OpenAPI 3.0.3.
+- `validate_dataset.py`: 20/20 API đạt; mọi GT hợp lệ OpenAPI 3.0.3. `check_connectivity.py` (01/11/2026): 10/10 API
+  công khai có probe trả 200 (Jikan bị timeout từ mạng thử nghiệm – xem `meta.yaml`), 6/6 API Docker nhóm A trả 200.
 - Bookstore-Lab: 20/20 test hành vi đạt; mọi probe trong `discrepancies.json` tái hiện đúng.
 - **Mốc tham chiếu:** nếu hệ thống trích xuất *hoàn hảo* tài liệu Bookstore-Lab (lấy chính doc-GT làm đặc tả sinh ra)
   rồi chấm theo GT hành vi, F1 nhóm ràng buộc chỉ đạt **0,81** (micro F1 0,86, không tính `type`). Phần chênh này là
@@ -195,4 +229,8 @@ sinh `meta.yaml`, `facts.jsonl`, `rendered.md`, cập nhật `manifest.json` r�
 - FDIC, Genome Nexus, LanguageTool, ohsome, OMDb, REST Countries – đặc tả lấy từ
   https://github.com/codingsoo/nlp2rest (commit `ae3783b7`), đã đổi `servers` sang URL công khai hiện hành.
   Kim et al., *Enhancing REST API Testing with NLP Techniques*, ISSTA 2023.
+- Đợt mở rộng 11/2026 (đặc tả do nhà cung cấp công bố, URL và ngày lấy ghi trong `meta.yaml`):
+  Spring PetClinic REST (Apache-2.0), httpbin (ISC), Typesense (GPL-3.0), Qdrant (Apache-2.0),
+  NWS weather.gov (public domain), PokéAPI (BSD-3-Clause), OpenDota (MIT), Spaceflight News – The Space Devs
+  (miễn phí, ghi nguồn), Jikan (MIT), Postcodes.io (MIT), Wikimedia REST (Apache-2.0; nội dung CC BY-SA).
 - Bookstore-Lab, công cụ trong `tools/` – sản phẩm của đề tài.

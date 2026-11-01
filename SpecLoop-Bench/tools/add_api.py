@@ -30,7 +30,7 @@ import yaml
 ROOT = Path(__file__).resolve().parent.parent
 TOOLS = Path(__file__).resolve().parent
 sys.path.insert(0, str(TOOLS))
-from oas_utils import dump_yaml, normalize_to_303, validate_spec  # noqa: E402
+from oas_utils import dump_yaml, normalize_to_303, validate_spec, write_text_lf  # noqa: E402
 
 
 def fetch(src: str) -> tuple[bytes, str]:
@@ -123,7 +123,7 @@ def main():
         "rq_scope": ["RQ1", "RQ2", "RQ3"] if a.scope != "none" else ["RQ1"],
         "added_by": "TODO", "notes": "",
     }
-    (d / "meta.yaml").write_text(yaml.safe_dump(meta, sort_keys=False, allow_unicode=True), encoding="utf-8")
+    write_text_lf(d / "meta.yaml", yaml.safe_dump(meta, sort_keys=False, allow_unicode=True))
     print(f"Đã tạo {d.relative_to(ROOT)}")
     for n in notes:
         print("  chuẩn hóa:", n)

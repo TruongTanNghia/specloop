@@ -22,7 +22,7 @@ environment:
   auth:
     type: none
   rate_limit_rps: 1
-  connectivity_checked: false
+  connectivity_checked: true
   probe:
     method: GET
     path: /metadata

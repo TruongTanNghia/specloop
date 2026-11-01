@@ -119,7 +119,7 @@ def main():
     res["gt_path"], res["pred_path"] = str(gt_path), a.pred
     print_table(res)
     if a.report:
-        Path(a.report).write_text(json.dumps(res, ensure_ascii=False, indent=1), encoding="utf-8")
+        Path(a.report).write_text(json.dumps(res, ensure_ascii=False, indent=1), encoding="utf-8", newline="\n")
         print(f"\nĐã ghi báo cáo chi tiết: {a.report}")
 
 

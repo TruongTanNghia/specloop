@@ -247,7 +247,7 @@ def main():
     a = ap.parse_args()
     keys = json.load(open(a.hide, encoding="utf-8"))["hidden_keys"] if a.hide else None
     text, used = render(load_spec(a.spec), keys)
-    Path(a.out).write_text(text, encoding="utf-8")
+    Path(a.out).write_text(text, encoding="utf-8", newline="\n")
     print(f"Đã ghi {a.out} ({len(text.splitlines())} dòng; ẩn {len(used)} ràng buộc)")
 
 

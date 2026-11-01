@@ -38,8 +38,13 @@ _Dumper.add_representer(str, _str_presenter)
 def dump_yaml(data, path: str | Path | None = None) -> str:
     text = yaml.dump(data, Dumper=_Dumper, sort_keys=False, allow_unicode=True, width=110)
     if path is not None:
-        Path(path).write_text(text, encoding="utf-8")
+        write_text_lf(path, text)
     return text
+
+
+def write_text_lf(path: str | Path, text: str) -> None:
+    """Ghi tệp văn bản UTF-8 với xuống dòng LF trên mọi hệ điều hành (tránh CRLF trên Windows làm đổi mã băm)."""
+    Path(path).write_text(text, encoding="utf-8", newline="\n")
 
 
 def sha256_file(path: str | Path) -> str:

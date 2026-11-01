@@ -74,8 +74,9 @@ def main():
         print(f"{'✓' if ok else '•'} {d.name:<20} {res.get('status')}  {res.get('latency_ms', '')} ms  {res.get('reason', res.get('error', ''))}")
         if ok and a.update_meta:
             text = mp.read_text(encoding="utf-8").replace("connectivity_checked: false", "connectivity_checked: true")
-            mp.write_text(text, encoding="utf-8")
-    (ROOT / "connectivity_report.json").write_text(json.dumps(report, ensure_ascii=False, indent=1), encoding="utf-8")
+            mp.write_text(text, encoding="utf-8", newline="\n")
+    (ROOT / "connectivity_report.json").write_text(json.dumps(report, ensure_ascii=False, indent=1), encoding="utf-8",
+                                                   newline="\n")
     print("Đã ghi connectivity_report.json")
 
 

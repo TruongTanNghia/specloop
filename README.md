@@ -25,7 +25,7 @@ specloop/
   backend/app/services/ ingestion · generation · evaluation · testing · analysis · versioning · llm · experiments
   backend/tests/        test_unit.py (thuật toán lõi) · test_integration.py (vòng lặp đầy đủ với Bookstore-Lab)
   frontend/             ứng dụng React (src/api, pages, components, hooks) + e2e Playwright
-  SpecLoop-Bench/       bộ dữ liệu + API thử nghiệm Bookstore-Lab (13 sai lệch cài cắm)
+  SpecLoop-Bench/       bộ dữ liệu 20 API (7 chạy Docker, 13 công khai) + Bookstore-Lab (13 sai lệch cài cắm)
   docs/ docker-compose.yml .env.example DECISIONS.md
 ```
 

@@ -23,7 +23,7 @@ import yaml
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from extract_facts import PROBEABLE, extract, summarize, write_jsonl  # noqa: E402
-from oas_utils import load_spec, sha256_file, validate_spec  # noqa: E402
+from oas_utils import load_spec, sha256_file, validate_spec, write_text_lf  # noqa: E402
 from render_docs import render  # noqa: E402
 
 DATASET_NAME = "SpecLoop-Bench"
@@ -72,7 +72,7 @@ def build_api(api_dir: Path, verbose=True) -> dict:
     write_jsonl(facts, api_dir / "ground_truth" / "facts.jsonl")
     (api_dir / "docs").mkdir(exist_ok=True)
     text, _ = render(spec)
-    (api_dir / "docs" / "rendered.md").write_text(text, encoding="utf-8")
+    write_text_lf(api_dir / "docs" / "rendered.md", text)
     abl = None
     if (meta.get("docs") or {}).get("make_ablated"):
         abl = select_ablation(facts, api_id)
@@ -80,8 +80,8 @@ def build_api(api_dir: Path, verbose=True) -> dict:
         missing = set(abl["hidden_keys"]) - used
         if missing:
             print(f"  ! [{api_id}] {len(missing)} khóa ẩn không xuất hiện khi render (bỏ qua)")
-        (api_dir / "docs" / "ablated.md").write_text(text_a, encoding="utf-8")
-        (api_dir / "ground_truth" / "ablation.json").write_text(json.dumps(abl, ensure_ascii=False, indent=1), encoding="utf-8")
+        write_text_lf(api_dir / "docs" / "ablated.md", text_a)
+        write_text_lf(api_dir / "ground_truth" / "ablation.json", json.dumps(abl, ensure_ascii=False, indent=1))
     beh_path = api_dir / "ground_truth" / "behavior_openapi.yaml"
     beh_facts = None
     if beh_path.exists():
@@ -146,12 +146,12 @@ def main():
                 "built_at": dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
                 "openapi_target": "3.0.3", "n_apis": len(entries),
                 "apis": [entries[k] for k in sorted(entries)]}
-    man_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=1), encoding="utf-8")
+    write_text_lf(man_path, json.dumps(manifest, ensure_ascii=False, indent=1))
     cols = ["id", "name", "group", "environment", "test_scope", "auth", "operations", "parameters", "request_fields",
             "responses", "response_fields", "constraints", "constraints_no_type", "facts_total", "doc_original_words",
             "doc_rendered_words", "ablated_hidden", "behavior_gt", "behavior_facts", "seeded_discrepancies", "rq_scope"]
     with open(ROOT / "stats.csv", "w", newline="", encoding="utf-8") as f:
-        w = csv.DictWriter(f, fieldnames=cols, extrasaction="ignore")
+        w = csv.DictWriter(f, fieldnames=cols, extrasaction="ignore", lineterminator="\n")
         w.writeheader()
         for e in manifest["apis"]:
             w.writerow(e["stats"])

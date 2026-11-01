@@ -181,7 +181,7 @@ def extract(spec: dict) -> list[dict]:
 
 
 def write_jsonl(facts, path):
-    with open(path, "w", encoding="utf-8") as f:
+    with open(path, "w", encoding="utf-8", newline="\n") as f:
         for r in sorted(facts, key=lambda r: r["key"]):
             f.write(json.dumps(r, ensure_ascii=False) + "\n")
 
