@@ -31,7 +31,7 @@ export default function ExperimentsPage() {
   const [jobId, setJobId] = useState<string | null>(null);
   const [expId, setExpId] = useState<number | null>(null);
   const [md, setMd] = useState<string | null>(null);
-  const apis = useQuery({ queryKey: ["bench-apis"], queryFn: api.benchApis });
+  const apis = useQuery({ queryKey: ["bench-apis-exp"], queryFn: api.benchApis });
   const providers = useQuery({ queryKey: ["providers"], queryFn: api.providers });
   const list = useQuery({ queryKey: ["experiments"], queryFn: api.experiments });
   const shown = expId ?? list.data?.[0]?.id ?? null;

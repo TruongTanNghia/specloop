@@ -11,7 +11,7 @@ from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from .api.deps import Problem
-from .api.v1 import jobs, misc, projects, specs, testing
+from .api.v1 import bench, jobs, misc, projects, specs, testing
 from .config import get_settings
 from .db import init_db
 
@@ -63,7 +63,7 @@ async def _unhandled(request: Request, e: Exception):
     return _problem(request, 500, "Lỗi máy chủ", f"{type(e).__name__}: {str(e)[:300]}")
 
 
-for r in (projects.router, specs.router, testing.router, jobs.router, misc.router):
+for r in (projects.router, specs.router, testing.router, jobs.router, misc.router, bench.router):
     app.include_router(r, prefix="/api/v1")
 
 

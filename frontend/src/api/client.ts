@@ -1,6 +1,7 @@
 // Client REST có kiểu cho backend SpecLoop (/api/v1). Lỗi theo RFC 7807 được đổi thành ApiError.
 import type {
-  BenchApi, Chunk, Dashboard, DiffResult, DocumentInfo, Evaluation, EvidenceItem, ExperimentListItem,
+  BenchApi, BenchApiCreate, BenchApiDetail, BenchApiRow, BenchConnectivity, BenchCreateResult, BenchPreview,
+  BenchSourceInput, Chunk, Dashboard, DiffResult, DocumentInfo, Evaluation, EvidenceItem, ExperimentListItem,
   ExperimentRequest, ExperimentResults, Finding, GroundTruth, Job, JobAccepted, JsonPatchOp, Observation,
   ObservationPage, Project, ProjectInput, Proposal, Provider, SpecVersion, TestRun, TestRunConfig, ValidationReport,
 } from "./types";
@@ -140,8 +141,18 @@ export const api = {
   jobs: (pid?: number) => get<Job[]>(`/jobs${qs({ project_id: pid })}`),
   cancelJob: (id: string) => post<Job>(`/jobs/${id}/cancel`),
 
+  // bộ dữ liệu SpecLoop-Bench
+  benchList: () => get<BenchApiRow[]>("/bench/apis"),
+  benchDetail: (id: string) => get<BenchApiDetail>(`/bench/apis/${encodeURIComponent(id)}`),
+  benchFile: (id: string, path: string) =>
+    request<string>("GET", `/bench/apis/${encodeURIComponent(id)}/file${qs({ path })}`, undefined, true),
+  benchPreview: (b: BenchSourceInput) => post<BenchPreview>("/bench/preview", b),
+  benchCreate: (b: BenchApiCreate) => post<BenchCreateResult>("/bench/apis", b),
+  benchDelete: (id: string) => del(`/bench/apis/${encodeURIComponent(id)}`),
+  benchConnectivity: (id: string) => post<BenchConnectivity>(`/bench/apis/${encodeURIComponent(id)}/connectivity`),
+
   // khác
-  health: () => get<{ status: string; llm_configured: boolean }>("/health"),
+  health:() => get<{ status: string; llm_configured: boolean }>("/health"),
   dashboard: () => get<Dashboard>("/dashboard"),
   providers: () => get<Provider[]>("/llm/providers"),
   llmTest: (b: { base_url?: string; api_key?: string; model?: string }) =>

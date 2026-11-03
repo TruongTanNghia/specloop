@@ -60,7 +60,7 @@ def word_count(path: Path) -> int:
     return len(path.read_text(encoding="utf-8").split()) if path.exists() else 0
 
 
-def build_api(api_dir: Path, verbose=True) -> dict:
+def build_api(api_dir: Path, verbose=True, root: Path = ROOT) -> dict:
     meta = yaml.safe_load((api_dir / "meta.yaml").read_text(encoding="utf-8"))
     api_id = meta["id"]
     gt_path = api_dir / "ground_truth" / "openapi.yaml"
@@ -118,30 +118,31 @@ def build_api(api_dir: Path, verbose=True) -> dict:
     for p in sorted(api_dir.rglob("*")):
         if p.is_file() and p.suffix != ".pyc" and not any(
                 part == "__pycache__" or part.startswith(".") for part in p.relative_to(api_dir).parts):
-            files[str(p.relative_to(ROOT))] = sha256_file(p)
+            files[p.relative_to(root).as_posix()] = sha256_file(p)  # luôn dùng "/" để manifest giống nhau mọi hệ điều hành
     if verbose:
         print(f"  ✓ {api_id:<20} ops={stats['operations']:<4} params={stats['parameters']:<4} "
               f"constraints={stats['constraints']:<5} facts={stats['facts_total']}")
     return {"meta": meta, "stats": stats, "files": files}
 
 
-def main():
-    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--api")
-    a = ap.parse_args()
-    api_dirs = sorted(d for d in (ROOT / "apis").iterdir() if d.is_dir() and not d.name.startswith("_"))
-    man_path = ROOT / "manifest.json"
+def update_manifest(root: Path = ROOT, apis: list[str] | None = None, verbose: bool = True) -> dict:
+    """Dựng lại các API trong `apis` (None = tất cả, [] = không dựng, chỉ gỡ API đã xóa) rồi ghi manifest.json,
+    stats.csv. Trả về manifest mới."""
+    root = Path(root)
+    api_dirs = sorted(d for d in (root / "apis").iterdir() if d.is_dir() and not d.name.startswith("_"))
+    man_path = root / "manifest.json"
     manifest = json.loads(man_path.read_text(encoding="utf-8")) if man_path.exists() else {}
     entries = {e["id"]: e for e in manifest.get("apis", [])}
-    print(f"Dựng {DATASET_NAME} v{DATASET_VERSION}:")
+    if verbose:
+        print(f"Dựng {DATASET_NAME} v{DATASET_VERSION}:")
     for d in api_dirs:
-        if a.api and d.name != a.api:
+        if apis is not None and d.name not in apis:
             continue
-        r = build_api(d)
+        r = build_api(d, verbose, root)
         m = r["meta"]
         entries[m["id"]] = {"id": m["id"], "name": m["name"], "group": m["group"], "path": f"apis/{d.name}",
                             "stats": r["stats"], "files": r["files"]}
-    entries = {k: v for k, v in entries.items() if (ROOT / "apis" / k).exists()}
+    entries = {k: v for k, v in entries.items() if (root / "apis" / k / "meta.yaml").exists()}
     manifest = {"name": DATASET_NAME, "version": DATASET_VERSION,
                 "built_at": dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
                 "openapi_target": "3.0.3", "n_apis": len(entries),
@@ -150,14 +151,25 @@ def main():
     cols = ["id", "name", "group", "environment", "test_scope", "auth", "operations", "parameters", "request_fields",
             "responses", "response_fields", "constraints", "constraints_no_type", "facts_total", "doc_original_words",
             "doc_rendered_words", "ablated_hidden", "behavior_gt", "behavior_facts", "seeded_discrepancies", "rq_scope"]
-    with open(ROOT / "stats.csv", "w", newline="", encoding="utf-8") as f:
+    with open(root / "stats.csv", "w", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(f, fieldnames=cols, extrasaction="ignore", lineterminator="\n")
         w.writeheader()
         for e in manifest["apis"]:
             w.writerow(e["stats"])
-        tot = {c: sum(e["stats"][c] for e in manifest["apis"]) for c in cols if isinstance(manifest["apis"][0]["stats"][c], int)}
-        w.writerow({"id": "TOTAL", **tot})
-    print(f"Đã cập nhật manifest.json ({len(entries)} API) và stats.csv")
+        if manifest["apis"]:
+            tot = {c: sum(e["stats"][c] for e in manifest["apis"]) for c in cols
+                   if isinstance(manifest["apis"][0]["stats"][c], int)}
+            w.writerow({"id": "TOTAL", **tot})
+    if verbose:
+        print(f"Đã cập nhật manifest.json ({len(entries)} API) và stats.csv")
+    return manifest
+
+
+def main():
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("--api")
+    a = ap.parse_args()
+    update_manifest(ROOT, [a.api] if a.api else None)
 
 
 if __name__ == "__main__":

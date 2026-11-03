@@ -1,9 +1,12 @@
-import { DashboardOutlined, ExperimentOutlined, FolderOpenOutlined, RobotOutlined, SettingOutlined } from "@ant-design/icons";
+import {
+  DashboardOutlined, DatabaseOutlined, ExperimentOutlined, FolderOpenOutlined, RobotOutlined, SettingOutlined,
+} from "@ant-design/icons";
 import { useQuery } from "@tanstack/react-query";
 import { Link, NavLink, Navigate, Route, Routes, useLocation, useMatch } from "react-router-dom";
 import { api } from "./api/client";
 import { LogoMark } from "./components/Logo";
 import DashboardPage from "./pages/DashboardPage";
+import DatasetPage from "./pages/DatasetPage";
 import ExperimentsPage from "./pages/ExperimentsPage";
 import ProjectDetailPage from "./pages/ProjectDetailPage";
 import ProjectsPage from "./pages/ProjectsPage";
@@ -14,6 +17,7 @@ const NAV = [
     { to: "/dashboard", label: "Tổng quan", icon: <DashboardOutlined /> },
     { to: "/projects", label: "Dự án", icon: <FolderOpenOutlined /> },
     { to: "/experiments", label: "Thực nghiệm", icon: <ExperimentOutlined /> },
+    { to: "/dataset", label: "Bộ dữ liệu", icon: <DatabaseOutlined /> },
   ] },
   { group: "Hệ thống", items: [
     { to: "/settings", label: "Cài đặt LLM", icon: <SettingOutlined /> },
@@ -21,7 +25,7 @@ const NAV = [
 ];
 
 const ROOT_TITLE: Record<string, string> = {
-  dashboard: "Tổng quan", projects: "Dự án", experiments: "Thực nghiệm", settings: "Cài đặt LLM",
+  dashboard: "Tổng quan", projects: "Dự án", experiments: "Thực nghiệm", dataset: "Bộ dữ liệu", settings: "Cài đặt LLM",
 };
 
 function Crumbs() {
@@ -101,6 +105,7 @@ export default function App() {
           <Route path="/projects" element={<ProjectsPage />} />
           <Route path="/projects/:id" element={<ProjectDetailPage />} />
           <Route path="/experiments" element={<ExperimentsPage />} />
+          <Route path="/dataset" element={<DatasetPage />} />
           <Route path="/settings" element={<SettingsPage />} />
           <Route path="*" element={<p className="page-lede">Không tìm thấy trang.</p>} />
         </Routes>

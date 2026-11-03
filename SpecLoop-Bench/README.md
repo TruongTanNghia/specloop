@@ -147,6 +147,13 @@ curl -X POST -H "X-Admin-Token: reset-me" http://localhost:8000/__admin/reset   
 Nguồn gợi ý: [APIs.guru openapi-directory](https://github.com/APIs-guru/openapi-directory) (hàng nghìn đặc tả),
 EvoMaster Benchmark (EMB – API chạy cục bộ), kho NLP2REST, trang docs của các dịch vụ mở.
 
+### 5.1b. Cách dễ nhất – trên giao diện web SpecLoop
+
+Mở menu **Bộ dữ liệu → Thêm API**: dán URL hoặc tải tệp đặc tả, bấm *Kiểm tra đặc tả*, sửa thông tin được điền sẵn
+(nhóm, môi trường, base URL, xác thực, giấy phép…), rồi *Thêm vào bộ dữ liệu*. Web dùng chung logic với
+`add_api.py` (`tools/spec_import.py`) nên kết quả giống hệt dòng lệnh; meta ghi thêm `added_via: web`, và chỉ API
+thêm từ web mới xóa được trên giao diện.
+
 ### 5.2. Cách nhanh – dùng `add_api.py`
 
 ```bash
@@ -169,7 +176,8 @@ Tham số quan trọng:
 | `--doc-original` | tài liệu gốc (HTML/MD/PDF/TXT) – đường dẫn hoặc URL |
 | `--ablated` | sinh thêm bản tài liệu lược ràng buộc (nên bật cho nhóm A) |
 
-Script tự động: lưu đặc tả gốc vào `source/`, chuẩn hóa về OpenAPI 3.0.3 (hạ cấp 3.1, sửa mã phản hồi dạng số),
+Script tự động: lưu đặc tả gốc vào `source/`, chuẩn hóa về OpenAPI 3.0.3 (chuyển Swagger 2.0, hạ cấp 3.1, sửa mã
+phản hồi dạng số và các lỗi hợp lệ hay gặp – xem 5.4),
 sinh `meta.yaml`, `facts.jsonl`, `rendered.md`, cập nhật `manifest.json` rồi chạy kiểm tra.
 **Sau đó mở `meta.yaml` điền các mục còn ghi TODO** (mô tả, giấy phép, probe kết nối) và chạy lại
 `python tools/build_dataset.py --api <id>`.

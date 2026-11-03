@@ -1,6 +1,6 @@
 // Thành phần dùng lại: tiêu đề trang, khối panel, nhãn mã sai lệch, chip, thanh độ tin cậy, tiến trình job, khung JSON.
 import { Alert, Progress, Space, Tooltip } from "antd";
-import type { CSSProperties, HTMLAttributes, ReactNode } from "react";
+import { forwardRef, type CSSProperties, type HTMLAttributes, type ReactNode } from "react";
 import { errorText } from "../api/client";
 import type { JobProgress } from "../hooks/useJobEvents";
 import { C, FONT_MONO } from "../theme";
@@ -30,9 +30,11 @@ export function CodeTag({ code }: { code: string }) {
 
 export type Tone = "blue" | "green" | "amber" | "red" | "teal" | "purple" | "gray";
 
-export function Chip({ tone, mono, children, title }: { tone?: Tone; mono?: boolean; children: ReactNode; title?: string }) {
-  return <span className={`chip ${tone ?? ""}${mono ? " mono" : ""}`} title={title}>{children}</span>;
-}
+// forwardRef + truyền tiếp props để dùng được làm con trực tiếp của Tooltip/Popover (tránh findDOMNode).
+export const Chip = forwardRef<HTMLSpanElement, { tone?: Tone; mono?: boolean; children: ReactNode; title?: string }
+  & HTMLAttributes<HTMLSpanElement>>(function Chip({ tone, mono, children, className, ...rest }, ref) {
+  return <span ref={ref} className={`chip ${tone ?? ""}${mono ? " mono" : ""} ${className ?? ""}`} {...rest}>{children}</span>;
+});
 
 export const TIER_TEXT: Record<string, { text: string; tone: Tone }> = {
   auto: { text: "Tin cậy cao", tone: "green" },

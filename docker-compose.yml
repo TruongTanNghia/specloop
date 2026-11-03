@@ -38,6 +38,9 @@ services:
       - "host.docker.internal:host-gateway"   # để gọi Ollama/LM Studio chạy trên máy host
     volumes:
       - specloop-data:/data
+      # bộ dữ liệu gắn trực tiếp từ máy host: API người dùng thêm trên trang "Bộ dữ liệu" được ghi vào
+      # ./SpecLoop-Bench (không mất khi tạo lại container, thấy ngay trong git)
+      - ./SpecLoop-Bench:/SpecLoop-Bench
     ports:
       - "8001:8000"
     depends_on:

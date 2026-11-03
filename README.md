@@ -106,6 +106,19 @@ trong CSDL, không ghi log.
    chấp nhận hàng loạt theo ngưỡng → *Áp dụng* tạo phiên bản `refined-k`; hoặc *Vòng lặp tự động* (K = 3).
 6. **Phiên bản**: diff YAML (Monaco) + diff ngữ nghĩa theo operation; xuất YAML/JSON (tùy chọn bỏ `x-*`, kèm `x-evidence`).
 
+**Bộ dữ liệu** (menu *Bộ dữ liệu*): xem 20 API của SpecLoop-Bench (nhóm, môi trường, số operation/ràng buộc/facts,
+tài liệu, ground truth) và **tự thêm API mới** qua trình 3 bước:
+
+1. **Đặc tả** – dán URL, tải tệp hoặc dán nội dung OpenAPI 3.0/3.1 hay Swagger 2.0 → *Kiểm tra đặc tả*: hệ thống
+   chuẩn hóa về 3.0.3 (chuyển Swagger 2.0, hạ cấp 3.1, sửa lỗi hay gặp) và báo số operation, servers, xác thực, lỗi.
+2. **Thông tin** – điền sẵn từ đặc tả: tên, mã, nhóm A/B, môi trường, base URL, xác thực (chỉ ghi *tên biến môi
+   trường* chứa khóa, không lưu khóa), giấy phép, tài liệu gốc (tùy chọn), có sinh bản lược ràng buộc hay không.
+3. **Xác nhận** – ghi `SpecLoop-Bench/apis/<mã>/`, sinh facts + tài liệu render, cập nhật `manifest.json`/`stats.csv`,
+   chạy kiểm tra toàn vẹn. API mới xuất hiện ngay ở trang *Thực nghiệm*.
+
+Trong khung chi tiết của mỗi API có *Kiểm tra kết nối*, xem tài liệu đầu vào và ground truth. Chỉ xóa được API
+thêm từ web; API gốc của bộ dữ liệu sửa/xóa thủ công trong thư mục. Cùng việc này bằng dòng lệnh: `tools/add_api.py`.
+
 An toàn kiểm thử: chỉ gọi host được phép, chặn IP nội bộ ngoài `TEST_ALLOWED_NETWORKS`, ≤ 5 req/s (sandbox) / ≤ 1 req/s
 (công khai), ngân sách 150/30 request mỗi operation, timeout 10 s, API công khai mặc định chỉ GET/HEAD/OPTIONS, header
 xác thực bị che trong vết.
@@ -219,4 +232,6 @@ Tác vụ dài trả `202 {job_id}`; theo dõi `GET /jobs/{id}` hoặc SSE `GET 
 `GET /specs/{id}/proposals?status=` · `POST /proposals/{id}/accept|reject` · `PATCH /proposals/{id}` ·
 `POST /specs/{id}/proposals/accept-threshold` · `POST /specs/{id}/apply` · `POST /specs/{id}/refine-loop` ·
 `GET /specs/{id}/diff?against=` · `GET /specs/{id}/export?format=&strip_extensions=` · `GET /jobs/{id}` · `GET /jobs/{id}/events` ·
-`POST /experiments` · `GET /experiments/{id}/results` · `GET /llm/providers` · `POST /llm/test` · `GET /dashboard` · `GET /health`
+`POST /experiments` · `GET /experiments/{id}/results` · `GET /llm/providers` · `POST /llm/test` · `GET /dashboard` · `GET /health` ·
+`GET /bench/apis` · `GET /bench/apis/{id}` · `GET /bench/apis/{id}/file?path=` · `POST /bench/preview` · `POST /bench/apis` ·
+`DELETE /bench/apis/{id}` · `POST /bench/apis/{id}/connectivity`

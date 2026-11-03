@@ -106,5 +106,14 @@ Tài khoản và phân quyền (FR-18), Alembic, crawl nhiều trang, tích hợ
 - Loại các ứng viên cần khóa/OAuth (Spotify, YouTube, TMDB), đặc tả nhiều tệp `$ref` ngoài (Shlink, Open Food Facts), xác thực Basic mà bộ thăm dò chưa hỗ trợ (Gotify, Listmonk), hoặc chặn bot (Art Institute of Chicago).
 - Viết `tools/swagger2_to_oas3.py` (Python thuần) thay cho `npx swagger2openapi` để chuyển httpbin; các lỗi hợp lệ hay gặp ở đặc tả tự sinh (kiểu `int/float`, số/boolean dạng chuỗi, regex `\p{L}`, thiếu tham số path, trường lạ trong `info.contact`, từ khóa JSON Schema 2020-12) được sửa tối thiểu và ghi từng mục vào `source.normalization`.
 - Qdrant ánh xạ cổng 6343:6333 vì 6333 hay bị Qdrant khác trên máy chiếm; Typesense dùng khóa cố định `specloop` (biến `TYPESENSE_API_KEY`). GT hành vi của 11 API mới để `pending` – xác minh dần qua kiểm thử.
+
+## 13. Người dùng tự thêm API vào bộ dữ liệu (03/11/2026)
+
+- Trang *Bộ dữ liệu* + `/api/v1/bench/*` (`services/bench_admin.py`) gọi lại chính công cụ của bench: logic nhập API tách thành `tools/spec_import.py` (đọc YAML/JSON, Swagger 2.0 → 3.0, hạ cấp 3.1, sửa lỗi hay gặp, gợi ý meta, tạo/xóa thư mục); `build_dataset.update_manifest(root, apis)` và `validate_dataset.check_api(..., root)` nhận thư mục gốc làm tham số. `add_api.py` (CLI) dùng cùng module nên hai đường cho kết quả giống nhau.
+- Có bước *xem trước* không ghi gì; tạo chỉ ghi khi đặc tả hợp lệ OAS 3.0.3 sau khi tự sửa, lỗi giữa chừng thì xóa thư mục và dựng lại manifest. Các thao tác ghi tuần tự hóa bằng một khóa (cùng sửa `manifest.json`/`stats.csv`).
+- Khóa API không bao giờ lưu: form chỉ nhận *tên biến môi trường* (`env_var`), giống quy ước của bench.
+- Chỉ xóa được API có `added_via: web` để không lỡ tay xóa API gốc. Đọc tệp chỉ cho phép tệp nằm trong `apis/<id>/` (chặn `../`), tối đa 3 MB; đặc tả tải từ URL tối đa 20 MB, timeout 60 s, chỉ http/https. Cho phép URL nội bộ (localhost) vì đặc tả của API chạy Docker thường nằm ở đó – công cụ dùng cục bộ cho nhóm nghiên cứu.
+- Docker: `./SpecLoop-Bench` gắn vào container backend thành volume để API thêm từ web không mất khi tạo lại container.
+- Sửa kèm: `build_dataset` ghi khóa tệp trong `manifest.json` bằng `/` (trước đó build trên Windows ra `\`); mã API gợi ý bỏ dấu tiếng Việt (“Kho Sách Thử” → `kho-sach-thu`).
 - Tổng quan dùng thẻ KPI có icon, `Steps` 5 bước của vòng lặp, biểu đồ sai lệch theo mã và bảng dự án gần đây; danh sách dự án là bảng dữ liệu có tìm kiếm; chi tiết dự án có đầu trang (tên, chip cấu hình, chọn phiên bản) và tab có icon. Monaco dùng theme sáng cùng bảng màu; Swagger UI dùng nguyên bản sáng.
 - Bảng rộng hơn cột thì cuộn ngang bên trong (`.ant-table-content { overflow-x: auto }`) để không tràn đè lên cột bên cạnh. Mọi `data-testid` và nhãn mà e2e Playwright dựa vào được giữ nguyên khi làm lại giao diện.

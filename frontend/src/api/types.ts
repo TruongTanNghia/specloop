@@ -333,6 +333,154 @@ export interface BenchApi {
   has_behavior_gt: boolean;
 }
 
+// ---- bộ dữ liệu SpecLoop-Bench (trang “Bộ dữ liệu”)
+export type BenchGroup = "A" | "B";
+export type BenchEnv = "local-docker" | "public" | "offline";
+export type BenchScope = "full" | "read-only" | "none";
+
+export interface BenchAuth {
+  type: "none" | "apiKey" | "bearer" | "oauth2";
+  in?: "header" | "query" | "cookie" | null;
+  name?: string | null;
+  env_var?: string | null;
+}
+
+export interface BenchApiRow {
+  id: string;
+  name: string;
+  group: BenchGroup | null;
+  description: string | null;
+  environment: BenchEnv | null;
+  test_scope: BenchScope | null;
+  base_url: string | null;
+  auth: string;
+  connectivity_checked: boolean;
+  license: string | null;
+  retrieved_at: string | null;
+  has_original_doc: boolean;
+  has_ablated_doc: boolean;
+  behavior_gt: string;
+  added_by: string | null;
+  added_via: string | null;
+  deletable: boolean;
+  operations: number | null;
+  parameters: number | null;
+  constraints: number | null;
+  facts: number | null;
+}
+
+export interface BenchStats {
+  operations: number;
+  parameters: number;
+  request_fields: number;
+  responses: number;
+  response_fields: number;
+  constraints: number;
+  constraints_no_type: number;
+  facts_total: number;
+  doc_original_words: number;
+  doc_rendered_words: number;
+  ablated_hidden: number;
+  constraint_by_keyword: Record<string, number>;
+  [k: string]: unknown;
+}
+
+export interface BenchApiDetail {
+  id: string;
+  meta: {
+    name: string;
+    group: BenchGroup;
+    description: string;
+    source: { spec_url: string; spec_file: string; license: string; homepage: string; docs_url: string;
+      retrieved_at: string; normalization: string[] };
+    environment: { type: BenchEnv; base_url: string; test_scope: BenchScope; auth: BenchAuth; rate_limit_rps: number;
+      connectivity_checked: boolean; probe: { method: string; path: string | null; params: Record<string, unknown> } };
+    docs: { original: string | null; rendered: string; ablated: string | null };
+    ground_truth: { behavior_status: string };
+    added_by?: string;
+    added_via?: string;
+    notes?: string;
+  };
+  stats: BenchStats | null;
+  files: { path: string; size: number }[];
+  deletable: boolean;
+}
+
+export interface BenchSourceInput {
+  spec_url?: string | null;
+  spec_text?: string | null;
+  filename?: string | null;
+}
+
+export interface BenchSuggested {
+  id: string;
+  name: string;
+  description: string;
+  base_url: string;
+  group: BenchGroup;
+  env: BenchEnv;
+  scope: BenchScope;
+  auth: BenchAuth;
+  license: string;
+  homepage: string;
+  docs_url: string;
+  probe_path: string;
+  exists: boolean;
+}
+
+export interface BenchPreview {
+  source_version: string;
+  title: string | null;
+  version: string | null;
+  operations: number;
+  paths: number;
+  servers: string[];
+  security_schemes: string[];
+  tags: string[];
+  size_bytes: number;
+  valid: boolean;
+  errors: string[];
+  normalization: string[];
+  suggested: BenchSuggested;
+}
+
+export interface BenchApiCreate extends BenchSourceInput {
+  id: string;
+  name: string;
+  group: BenchGroup;
+  env: BenchEnv;
+  scope: BenchScope;
+  base_url?: string | null;
+  auth: BenchAuth;
+  description?: string | null;
+  license?: string | null;
+  homepage?: string | null;
+  docs_url?: string | null;
+  rate_limit_rps?: number | null;
+  probe_path?: string | null;
+  make_ablated: boolean;
+  added_by?: string | null;
+  doc_original_text?: string | null;
+  doc_original_filename?: string | null;
+}
+
+export interface BenchCreateResult {
+  id: string;
+  path: string;
+  stats: BenchStats;
+  normalization: string[];
+  validation: { ok: boolean; errors: string[]; warnings: string[] };
+}
+
+export interface BenchConnectivity {
+  ok: boolean;
+  status: number | string;
+  latency_ms?: number;
+  url?: string;
+  reason?: string;
+  error?: string;
+}
+
 export interface ExperimentRequest {
   name: string;
   apis: string[];

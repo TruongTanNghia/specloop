@@ -32,7 +32,7 @@ SCOPES = {"full", "read-only", "none"}
 DISC_CODES = {f"D{i}" for i in range(10)}
 
 
-def check_api(d: Path, manifest_files: dict) -> tuple[list, list]:
+def check_api(d: Path, manifest_files: dict, root: Path = ROOT) -> tuple[list, list]:
     errs, warns = [], []
     mp = d / "meta.yaml"
     if not mp.exists():
@@ -106,7 +106,7 @@ def check_api(d: Path, manifest_files: dict) -> tuple[list, list]:
             if x.get("code") not in DISC_CODES:
                 errs.append(f"discrepancies[{i}].code không hợp lệ")
     for rel, h in manifest_files.items():
-        p = ROOT / rel
+        p = Path(root) / rel
         if not p.exists():
             errs.append(f"manifest liệt kê tệp không tồn tại: {rel}")
         elif sha256_file(p) != h:

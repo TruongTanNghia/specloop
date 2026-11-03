@@ -317,6 +317,44 @@ class ExperimentRequest(BaseModel):
     max_rps: float | None = None
 
 
+# ---------------------------------------------------------------- bộ dữ liệu SpecLoop-Bench
+class BenchSource(BaseModel):
+    """Nguồn đặc tả: URL hoặc nội dung (dán / đọc từ tệp tải lên ở trình duyệt)."""
+    spec_url: str | None = None
+    spec_text: str | None = Field(default=None, max_length=20_000_000)
+    filename: str | None = None
+
+
+class BenchAuth(BaseModel):
+    type: Literal["none", "apiKey", "bearer", "oauth2"] = "none"
+    in_: Literal["header", "query", "cookie"] | None = Field(default=None, alias="in")
+    name: str | None = None
+    env_var: str | None = None  # tên biến môi trường chứa khóa trên máy chạy kiểm thử (không lưu khóa)
+
+    model_config = ConfigDict(populate_by_name=True)
+
+
+class BenchApiCreate(BenchSource):
+    id: str = Field(min_length=2, max_length=41)
+    name: str = Field(min_length=1, max_length=200)
+    group: Literal["A", "B"] = "B"
+    env: Literal["local-docker", "public", "offline"] = "public"
+    scope: Literal["full", "read-only", "none"] = "read-only"
+    base_url: str | None = None
+    auth: BenchAuth = BenchAuth()
+    description: str | None = Field(default=None, max_length=2000)
+    license: str | None = None
+    homepage: str | None = None
+    docs_url: str | None = None
+    rate_limit_rps: float | None = Field(default=None, gt=0, le=100)
+    probe_path: str | None = None
+    make_ablated: bool = False
+    added_by: str | None = None
+    notes: str | None = Field(default=None, max_length=2000)
+    doc_original_text: str | None = Field(default=None, max_length=5_000_000)
+    doc_original_filename: str | None = None
+
+
 class LLMTestRequest(BaseModel):
     base_url: str | None = None
     api_key: str | None = None
