@@ -12,6 +12,10 @@ frontend/playwright-report/
 # Dữ liệu chạy
 data/
 .env
+*.key
+*.pem
 *.db
 *.db-wal
 *.db-shm
+# Ghi chú làm việc riêng (prompt, ảnh tham khảo) – không đưa lên repo
+careful-writing/

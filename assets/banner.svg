@@ -1,0 +1,108 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1200" height="380" viewBox="0 0 1200 380" role="img" aria-label="SpecLoop – Tài liệu REST API thành OpenAPI 3.0.3 có trích dẫn, kiểm thử API thật và tự đề xuất sửa">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#FCF6EC"/>
+      <stop offset="1" stop-color="#F3E3CC"/>
+    </linearGradient>
+    <pattern id="dots" width="22" height="22" patternUnits="userSpaceOnUse">
+      <circle cx="2" cy="2" r="1.4" fill="#0E4A63" fill-opacity="0.08"/>
+    </pattern>
+    <radialGradient id="glow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#FFB547" stop-opacity="0.45"/>
+      <stop offset="0.6" stop-color="#FFB547" stop-opacity="0.12"/>
+      <stop offset="1" stop-color="#FFB547" stop-opacity="0"/>
+    </radialGradient>
+    <path id="ring" d="M930,72 A118,118 0 1,1 929.99,72 Z"/>
+  </defs>
+
+  <rect width="1200" height="380" rx="22" fill="url(#bg)"/>
+  <rect width="1200" height="380" rx="22" fill="url(#dots)"/>
+
+  <!-- ===== Bên trái: tên dự án ===== -->
+  <g font-family="'Segoe UI', 'Helvetica Neue', Arial, sans-serif">
+    <text x="72" y="92" font-size="13" font-weight="700" letter-spacing="3" fill="#1E8FA8">ĐỀ TÀI NGHIÊN CỨU · AI HỌC LẬP TRÌNH</text>
+    <text x="66" y="182" font-size="96" font-weight="800" letter-spacing="-2"><tspan fill="#0E4A63">Spec</tspan><tspan fill="#F28C1B">Loop</tspan></text>
+    <line x1="72" y1="206" x2="402" y2="206" stroke="#F28C1B" stroke-width="5" stroke-linecap="round" stroke-dasharray="330" stroke-dashoffset="330">
+      <animate attributeName="stroke-dashoffset" from="330" to="0" dur="1.6s" begin="0.2s" fill="freeze"/>
+    </line>
+    <line x1="72" y1="216" x2="252" y2="216" stroke="#3BB8C3" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="180" stroke-dashoffset="180">
+      <animate attributeName="stroke-dashoffset" from="180" to="0" dur="1.2s" begin="0.9s" fill="freeze"/>
+    </line>
+    <text x="72" y="254" font-size="20" fill="#0E4A63" fill-opacity="0.88">Tài liệu REST API → OpenAPI 3.0.3 có trích dẫn</text>
+    <text x="72" y="284" font-size="20" fill="#0E4A63" fill-opacity="0.88">→ kiểm thử API thật → đề xuất sửa → hội tụ</text>
+
+    <!-- chip công nghệ -->
+    <g font-size="14" font-weight="600" text-anchor="middle">
+      <rect x="72" y="304" width="87" height="32" rx="16" fill="#FFFFFF" fill-opacity="0.75" stroke="#0E4A63" stroke-width="1.5"/>
+      <text x="115.5" y="325" fill="#0E4A63">FastAPI</text>
+      <rect x="171" y="304" width="95" height="32" rx="16" fill="#FFFFFF" fill-opacity="0.75" stroke="#1E8FA8" stroke-width="1.5"/>
+      <text x="218.5" y="325" fill="#1E8FA8">React 18</text>
+      <rect x="278" y="304" width="137" height="32" rx="16" fill="#FFFFFF" fill-opacity="0.75" stroke="#F28C1B" stroke-width="1.5"/>
+      <text x="346.5" y="325" fill="#C96A05">OpenAPI 3.0.3</text>
+      <rect x="427" y="304" width="120" height="32" rx="16" fill="#FFFFFF" fill-opacity="0.75" stroke="#0E4A63" stroke-width="1.5"/>
+      <text x="487" y="325" fill="#0E4A63">LLM · Qwen3</text>
+    </g>
+
+    <text x="72" y="364" font-size="12" fill="#0E4A63" fill-opacity="0.55">© Trương Tấn Nghĩa · AI Học Lập Trình</text>
+  </g>
+
+  <!-- ===== Bên phải: vòng lặp động ===== -->
+  <circle cx="930" cy="190" r="150" fill="url(#glow)">
+    <animate attributeName="r" values="140;158;140" dur="4s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="930" cy="190" r="142" fill="none" stroke="#3BB8C3" stroke-width="2" stroke-dasharray="4 12" stroke-linecap="round" opacity="0.7">
+    <animateTransform attributeName="transform" type="rotate" from="0 930 190" to="360 930 190" dur="40s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="930" cy="190" r="118" fill="none" stroke="#0E4A63" stroke-width="3" stroke-opacity="0.18"/>
+  <circle cx="930" cy="190" r="118" fill="none" stroke="#F28C1B" stroke-width="4" stroke-linecap="round" stroke-dasharray="150 592">
+    <animateTransform attributeName="transform" type="rotate" from="-90 930 190" to="270 930 190" dur="6s" repeatCount="indefinite"/>
+  </circle>
+  <!-- dữ liệu chạy quanh vòng -->
+  <circle r="5" fill="#1E8FA8">
+    <animateMotion dur="6s" repeatCount="indefinite" rotate="auto"><mpath xlink:href="#ring"/></animateMotion>
+  </circle>
+  <circle r="4" fill="#F28C1B">
+    <animateMotion dur="6s" begin="-2s" repeatCount="indefinite"><mpath xlink:href="#ring"/></animateMotion>
+  </circle>
+  <circle r="3.5" fill="#0E4A63">
+    <animateMotion dur="6s" begin="-4s" repeatCount="indefinite"><mpath xlink:href="#ring"/></animateMotion>
+  </circle>
+
+  <!-- 4 trạm: tài liệu · OpenAPI · kiểm thử · đề xuất sửa -->
+  <g font-family="'Segoe UI', 'Helvetica Neue', Arial, sans-serif">
+    <g>
+      <circle cx="930" cy="72" r="26" fill="#FFFFFF" stroke="#0E4A63" stroke-width="2.5"/>
+      <rect x="920" y="59" width="20" height="26" rx="3" fill="none" stroke="#0E4A63" stroke-width="2"/>
+      <line x1="924" y1="66" x2="936" y2="66" stroke="#1E8FA8" stroke-width="2"/>
+      <line x1="924" y1="72" x2="936" y2="72" stroke="#1E8FA8" stroke-width="2"/>
+      <line x1="924" y1="78" x2="932" y2="78" stroke="#1E8FA8" stroke-width="2"/>
+      <text x="930" y="36" font-size="13" font-weight="700" fill="#0E4A63" text-anchor="middle">Tài liệu</text>
+    </g>
+    <g>
+      <circle cx="1048" cy="190" r="26" fill="#FFFFFF" stroke="#0E4A63" stroke-width="2.5"/>
+      <text x="1048" y="197" font-size="19" font-weight="800" fill="#F28C1B" text-anchor="middle">{ }</text>
+      <text x="1084" y="195" font-size="13" font-weight="700" fill="#0E4A63">OpenAPI</text>
+    </g>
+    <g>
+      <circle cx="930" cy="308" r="26" fill="#FFFFFF" stroke="#0E4A63" stroke-width="2.5"/>
+      <path d="M923,296 L941,308 L923,320 Z" fill="#1E8FA8"/>
+      <text x="930" y="354" font-size="13" font-weight="700" fill="#0E4A63" text-anchor="middle">Kiểm thử</text>
+    </g>
+    <g>
+      <circle cx="812" cy="190" r="26" fill="#FFFFFF" stroke="#0E4A63" stroke-width="2.5"/>
+      <path d="M800,190 L809,199 L825,181" fill="none" stroke="#F28C1B" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <text x="776" y="195" font-size="13" font-weight="700" fill="#0E4A63" text-anchor="end">Đề xuất sửa</text>
+    </g>
+  </g>
+
+  <!-- tâm: biểu tượng vòng lặp + dấu kiểm, nhấp nhô -->
+  <g>
+    <animateTransform attributeName="transform" type="translate" values="0,-4;0,4;0,-4" dur="3.2s" repeatCount="indefinite"/>
+    <rect x="886" y="146" width="88" height="88" rx="22" fill="#0E4A63"/>
+    <path d="M908,190 A22,22 0 1,1 930,212" fill="none" stroke="#3BB8C3" stroke-width="5" stroke-linecap="round"/>
+    <path d="M924,206 L931,213 L924,219" fill="none" stroke="#3BB8C3" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M920,190 L928,198 L942,182" fill="none" stroke="#FFB547" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="36" stroke-dashoffset="36">
+      <animate attributeName="stroke-dashoffset" values="36;0;0;36" keyTimes="0;0.3;0.85;1" dur="3.2s" repeatCount="indefinite"/>
+    </path>
+  </g>
+</svg>

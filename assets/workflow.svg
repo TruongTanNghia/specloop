@@ -1,0 +1,95 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1200" height="270" viewBox="0 0 1200 270" role="img" aria-label="Quy trình SpecLoop: nạp tài liệu, sinh OpenAPI, đánh giá, kiểm thử API thật, phát hiện sai lệch, đề xuất sửa, rồi lặp lại đến khi hội tụ">
+  <defs>
+    <linearGradient id="wbg" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#FCF6EC"/>
+      <stop offset="1" stop-color="#F3E3CC"/>
+    </linearGradient>
+    <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 Z" fill="#1E8FA8"/>
+    </marker>
+    <marker id="arrO" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 Z" fill="#F28C1B"/>
+    </marker>
+    <path id="main" d="M45,128 H1155"/>
+    <path id="back" d="M1075,168 V214 H695 V168"/>
+  </defs>
+
+  <rect width="1200" height="270" rx="20" fill="url(#wbg)"/>
+
+  <g font-family="'Segoe UI', 'Helvetica Neue', Arial, sans-serif">
+    <!-- nhãn giai đoạn -->
+    <g font-size="12" font-weight="700" letter-spacing="2" text-anchor="middle" fill="#1E8FA8">
+      <text x="125" y="40">ĐẦU VÀO</text>
+      <text x="315" y="40">SINH ĐẶC TẢ</text>
+      <text x="505" y="40">ĐÁNH GIÁ</text>
+      <text x="885" y="40" fill="#C96A05">VÒNG PHẢN HỒI · TỐI ĐA K = 3 VÒNG</text>
+    </g>
+    <path d="M615,52 V46 H1155 V52" fill="none" stroke="#F28C1B" stroke-width="2" stroke-linecap="round"/>
+
+    <!-- đường dữ liệu chạy phía sau các khối (chỉ lộ ra ở khe giữa) -->
+    <use xlink:href="#main" stroke="#1E8FA8" stroke-width="2.5" stroke-dasharray="6 6" fill="none" opacity="0.55"/>
+    <circle r="6" fill="#F28C1B">
+      <animateMotion dur="5s" repeatCount="indefinite"><mpath xlink:href="#main"/></animateMotion>
+    </circle>
+    <circle r="4.5" fill="#1E8FA8">
+      <animateMotion dur="5s" begin="-2.5s" repeatCount="indefinite"><mpath xlink:href="#main"/></animateMotion>
+    </circle>
+    <g stroke="#1E8FA8" stroke-width="2.5" marker-end="url(#arr)">
+      <line x1="207" y1="128" x2="232" y2="128"/>
+      <line x1="397" y1="128" x2="422" y2="128"/>
+      <line x1="587" y1="128" x2="612" y2="128"/>
+      <line x1="777" y1="128" x2="802" y2="128"/>
+      <line x1="967" y1="128" x2="992" y2="128"/>
+    </g>
+
+    <!-- các bước -->
+    <g text-anchor="middle">
+      <g>
+        <rect x="45" y="88" width="160" height="80" rx="14" fill="#FFFFFF" stroke="#0E4A63" stroke-width="2"/>
+        <circle cx="125" cy="88" r="13" fill="#0E4A63"/><text x="125" y="93" font-size="13" font-weight="700" fill="#FFFFFF">1</text>
+        <text x="125" y="127" font-size="15" font-weight="700" fill="#0E4A63">Nạp tài liệu</text>
+        <text x="125" y="150" font-size="12" fill="#1E8FA8">HTML · PDF · URL</text>
+      </g>
+      <g>
+        <rect x="235" y="88" width="160" height="80" rx="14" fill="#FFFFFF" stroke="#0E4A63" stroke-width="2"/>
+        <circle cx="315" cy="88" r="13" fill="#0E4A63"/><text x="315" y="93" font-size="13" font-weight="700" fill="#FFFFFF">2</text>
+        <text x="315" y="127" font-size="15" font-weight="700" fill="#0E4A63">Sinh OpenAPI</text>
+        <text x="315" y="150" font-size="12" fill="#1E8FA8">LLM + trích dẫn</text>
+      </g>
+      <g>
+        <rect x="425" y="88" width="160" height="80" rx="14" fill="#FFFFFF" stroke="#0E4A63" stroke-width="2"/>
+        <circle cx="505" cy="88" r="13" fill="#0E4A63"/><text x="505" y="93" font-size="13" font-weight="700" fill="#FFFFFF">3</text>
+        <text x="505" y="127" font-size="15" font-weight="700" fill="#0E4A63">Đánh giá</text>
+        <text x="505" y="150" font-size="12" fill="#1E8FA8">L1–L5 · P / R / F1</text>
+      </g>
+      <g>
+        <rect x="615" y="88" width="160" height="80" rx="14" fill="#FFFFFF" stroke="#F28C1B" stroke-width="2.5"/>
+        <circle cx="695" cy="88" r="13" fill="#F28C1B"/><text x="695" y="93" font-size="13" font-weight="700" fill="#FFFFFF">4</text>
+        <text x="695" y="127" font-size="15" font-weight="700" fill="#0E4A63">Kiểm thử thật</text>
+        <text x="695" y="150" font-size="12" fill="#1E8FA8">dò biên · enum · null</text>
+      </g>
+      <g>
+        <rect x="805" y="88" width="160" height="80" rx="14" fill="#FFFFFF" stroke="#F28C1B" stroke-width="2.5"/>
+        <circle cx="885" cy="88" r="13" fill="#F28C1B"/><text x="885" y="93" font-size="13" font-weight="700" fill="#FFFFFF">5</text>
+        <text x="885" y="127" font-size="15" font-weight="700" fill="#0E4A63">Phát hiện sai</text>
+        <text x="885" y="150" font-size="12" fill="#1E8FA8">D0–D9 · độ tin cậy</text>
+      </g>
+      <g>
+        <rect x="995" y="88" width="160" height="80" rx="14" fill="#FFFFFF" stroke="#F28C1B" stroke-width="2.5"/>
+        <circle cx="1075" cy="88" r="13" fill="#F28C1B"/><text x="1075" y="93" font-size="13" font-weight="700" fill="#FFFFFF">6</text>
+        <text x="1075" y="127" font-size="15" font-weight="700" fill="#0E4A63">Đề xuất sửa</text>
+        <text x="1075" y="150" font-size="12" fill="#1E8FA8">JSON Patch · duyệt</text>
+      </g>
+    </g>
+
+    <!-- vòng quay lại: phiên bản mới được kiểm thử lại -->
+    <use xlink:href="#back" stroke="#F28C1B" stroke-width="2.5" fill="none" marker-end="url(#arrO)"/>
+    <circle r="5" fill="#0E4A63">
+      <animateMotion dur="3s" repeatCount="indefinite"><mpath xlink:href="#back"/></animateMotion>
+    </circle>
+    <text x="885" y="240" font-size="13" font-weight="600" fill="#C96A05" text-anchor="middle">OAS v(k+1) · kiểm thử lại đến khi không còn đề xuất mới</text>
+
+    <text x="45" y="206" font-size="12.5" font-style="italic" fill="#0E4A63" fill-opacity="0.75">Mọi phần tử của đặc tả kèm câu trích nguyên văn từ tài liệu</text>
+    <text x="45" y="226" font-size="12.5" font-style="italic" fill="#0E4A63" fill-opacity="0.75">→ chống “bịa”, người duyệt biết từng quy tắc lấy ở đâu</text>
+  </g>
+</svg>

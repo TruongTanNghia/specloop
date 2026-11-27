@@ -1,0 +1,80 @@
+BẢN QUYỀN / COPYRIGHT NOTICE
+
+Copyright (c) 2026 Trương Tấn Nghĩa – AI Học Lập Trình. All Rights Reserved.
+Bản quyền (c) 2026 Trương Tấn Nghĩa – AI Học Lập Trình. Bảo lưu mọi quyền.
+
+=====================================================================
+TIẾNG VIỆT
+=====================================================================
+
+1. Phạm vi
+   Toàn bộ mã nguồn, tài liệu, hình ảnh, thiết kế giao diện và các tệp khác trong kho
+   mã nguồn này (gọi chung là "Phần mềm") thuộc quyền sở hữu của Trương Tấn Nghĩa –
+   AI Học Lập Trình, trừ phần của bên thứ ba nêu ở mục 4.
+
+2. Có quyền truy cập không đồng nghĩa với được cấp phép
+   Phần mềm được công khai để xem và tham khảo. Việc kho mã nguồn ở chế độ công khai,
+   hoặc việc bạn xem, tải về hay sao chép Phần mềm về máy, KHÔNG cấp cho bạn bất kỳ
+   quyền nào ngoài quyền đọc mã nguồn trên GitHub theo Điều khoản dịch vụ của GitHub.
+
+3. Các hành vi bị cấm khi chưa có sự đồng ý bằng văn bản của tác giả
+   a) Sao chép, nhân bản toàn bộ hoặc một phần Phần mềm;
+   b) Chỉnh sửa, dịch, chuyển thể hoặc tạo sản phẩm phái sinh từ Phần mềm;
+   c) Phân phối, công bố lại, cho thuê, cho mượn, bán hoặc chuyển giao Phần mềm;
+   d) Sử dụng Phần mềm cho mục đích thương mại hoặc cung cấp như một dịch vụ;
+   e) Nộp Phần mềm hoặc một phần của nó như sản phẩm, đồ án, bài nghiên cứu của người khác;
+   f) Gỡ bỏ hoặc thay đổi thông tin bản quyền, chữ ký, logo, thương hiệu của tác giả.
+
+4. Thành phần của bên thứ ba
+   Các đặc tả OpenAPI, tài liệu và dữ liệu của bên thứ ba trong thư mục
+   SpecLoop-Bench/apis/ (cùng dữ liệu dẫn xuất từ chúng) thuộc về chủ sở hữu tương ứng
+   và giữ nguyên giấy phép gốc, được ghi trong từng tệp meta.yaml và mục "Nguồn và giấy phép"
+   của SpecLoop-Bench/README.md. Các thư viện mã nguồn mở được khai báo trong
+   backend/requirements*.txt và frontend/package.json tuân theo giấy phép riêng của chúng.
+   Thông báo bản quyền này không thay đổi giấy phép của các thành phần đó.
+
+5. Không bảo đảm
+   Phần mềm được cung cấp "nguyên trạng", không kèm bất kỳ bảo đảm nào. Tác giả không chịu
+   trách nhiệm về bất kỳ thiệt hại nào phát sinh từ việc sử dụng Phần mềm.
+
+6. Liên hệ xin phép
+   GitHub: https://github.com/TruongTanNghia
+   Portfolio: https://nghia-dev-profile.vercel.app
+
+=====================================================================
+ENGLISH
+=====================================================================
+
+1. Scope
+   All source code, documentation, images, UI designs and other files in this repository
+   (collectively, the "Software") are the property of Trương Tấn Nghĩa – AI Học Lập Trình,
+   except for the third-party components described in section 4.
+
+2. Access is not a license
+   The Software is published for viewing and reference only. The fact that this repository
+   is public, or that you view, download or clone the Software, does NOT grant you any rights
+   other than reading the source code on GitHub under GitHub's Terms of Service.
+
+3. Prohibited without the author's prior written permission
+   a) Copying or reproducing the Software, in whole or in part;
+   b) Modifying, translating, adapting or creating derivative works of the Software;
+   c) Distributing, republishing, renting, lending, selling or otherwise transferring the Software;
+   d) Using the Software for commercial purposes or offering it as a service;
+   e) Submitting the Software, or any part of it, as another person's product, coursework or research;
+   f) Removing or altering the author's copyright notices, signature, logo or branding.
+
+4. Third-party components
+   The third-party OpenAPI specifications, documentation and data in SpecLoop-Bench/apis/
+   (and data derived from them) belong to their respective owners and remain under their
+   original licenses, as recorded in each meta.yaml file and in the "Nguồn và giấy phép"
+   (Sources and licenses) section of SpecLoop-Bench/README.md. Open-source libraries declared
+   in backend/requirements*.txt and frontend/package.json are governed by their own licenses.
+   This notice does not change the license of any such component.
+
+5. No warranty
+   The Software is provided "as is", without warranty of any kind. In no event shall the author
+   be liable for any damages arising from the use of the Software.
+
+6. Requests for permission
+   GitHub: https://github.com/TruongTanNghia
+   Portfolio: https://nghia-dev-profile.vercel.app
