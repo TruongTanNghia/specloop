@@ -442,6 +442,7 @@ export interface BenchPreview {
   errors: string[];
   normalization: string[];
   suggested: BenchSuggested;
+  resolved_url: string | null; // link thật sự đã tải (link GitHub/GitLab/Gist được đổi sang link Raw)
 }
 
 export interface BenchApiCreate extends BenchSourceInput {

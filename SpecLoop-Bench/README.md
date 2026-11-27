@@ -152,7 +152,9 @@ EvoMaster Benchmark (EMB – API chạy cục bộ), kho NLP2REST, trang docs c�
 Mở menu **Bộ dữ liệu → Thêm API**: dán URL hoặc tải tệp đặc tả, bấm *Kiểm tra đặc tả*, sửa thông tin được điền sẵn
 (nhóm, môi trường, base URL, xác thực, giấy phép…), rồi *Thêm vào bộ dữ liệu*. Web dùng chung logic với
 `add_api.py` (`tools/spec_import.py`) nên kết quả giống hệt dòng lệnh; meta ghi thêm `added_via: web`, và chỉ API
-thêm từ web mới xóa được trên giao diện.
+thêm từ web mới xóa được trên giao diện. Link GitHub dạng `github.com/…/blob/…` dán thẳng được (tự đổi sang Raw);
+đặc tả chia nhiều tệp được tự gộp và bản gộp lưu ở `source/`. Hướng dẫn có ảnh và danh sách nguồn đã thử:
+`../docs/HUONG_DAN_THEM_API.md`.
 
 ### 5.2. Cách nhanh – dùng `add_api.py`
 

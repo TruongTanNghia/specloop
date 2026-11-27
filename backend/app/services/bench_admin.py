@@ -7,22 +7,27 @@ manifest.json / stats.csv.
 from __future__ import annotations
 
 import json
+import os
 import re
 import threading
+import time
 import urllib.error
 import urllib.request
 from pathlib import Path
 from urllib.parse import urlparse
 
 import yaml
+from dotenv import dotenv_values
 
 from ..bench import BENCH_DIR  # import này đưa SpecLoop-Bench/tools vào sys.path – phải đứng trước khối dưới
+from ..config import REPO_ROOT
 
 # isort: split
 import build_dataset  # noqa: E402
 import check_connectivity  # noqa: E402
 import spec_import  # noqa: E402
 
+DOTENV_PATH = REPO_ROOT / ".env"
 MAX_SPEC_BYTES = 20 * 1024 * 1024
 MAX_FILE_VIEW_BYTES = 3 * 1024 * 1024
 _LOCK = threading.Lock()
@@ -116,16 +121,34 @@ def read_file(api_id: str, rel: str) -> tuple[str, str]:
 
 
 # ----------------------------------------------------------------- nguồn đặc tả
+_FETCH_CACHE: dict[str, tuple[float, bytes]] = {}  # url -> (thời điểm, nội dung): bước xem trước và bước thêm
+FETCH_CACHE_TTL_S = 900                             # dùng chung lượt tải (đặc tả nhiều tệp có thể hàng trăm tệp)
+FETCH_CACHE_MAX_BYTES = 200 * 1024 * 1024
+
+
 def fetch_url(url: str) -> tuple[bytes, str]:
     if not re.match(r"^https?://", url or ""):
         raise BenchError(422, "URL không hợp lệ", "URL đặc tả phải bắt đầu bằng http:// hoặc https://")
+    hit = _FETCH_CACHE.get(url)
+    if hit and time.monotonic() - hit[0] < FETCH_CACHE_TTL_S:
+        return hit[1], Path(urlparse(url).path).suffix.lower()
+    data, suffix = _download(url)
+    if sum(len(v[1]) for v in _FETCH_CACHE.values()) + len(data) > FETCH_CACHE_MAX_BYTES:
+        _FETCH_CACHE.clear()
+    _FETCH_CACHE[url] = (time.monotonic(), data)
+    return data, suffix
+
+
+def _download(url: str) -> tuple[bytes, str]:
     req = urllib.request.Request(url, headers={"User-Agent": "SpecLoop/1.0 (+bench import)",
                                                "Accept": "application/json, application/yaml, text/yaml, */*"})
     try:
         with urllib.request.urlopen(req, timeout=60) as r:
             data = r.read(MAX_SPEC_BYTES + 1)
     except urllib.error.HTTPError as e:
-        raise BenchError(422, "Không tải được đặc tả", f"Máy chủ trả HTTP {e.code} cho {url}") from e
+        hint = (" – kiểm tra lại tên nhánh / đường dẫn tệp; kho riêng tư (private) không tải được, hãy tải tệp về "
+                "rồi dùng “Tải tệp lên”") if e.code == 404 and "githubusercontent.com" in url else ""
+        raise BenchError(422, "Không tải được đặc tả", f"Máy chủ trả HTTP {e.code} cho {url}{hint}") from e
     except Exception as e:  # noqa: BLE001
         raise BenchError(422, "Không tải được đặc tả", f"{url}: {e}") from e
     if len(data) > MAX_SPEC_BYTES:
@@ -137,14 +160,28 @@ def load_source(spec_url: str | None, spec_text: str | None, filename: str | Non
     if spec_text and spec_text.strip():
         return spec_text.encode("utf-8"), Path(filename or "").suffix.lower()
     if spec_url and spec_url.strip():
-        return fetch_url(spec_url.strip())
+        return fetch_url(spec_import.resolve_spec_url(spec_url))
     raise BenchError(422, "Thiếu đặc tả", "Nhập URL, dán nội dung hoặc tải tệp OpenAPI/Swagger lên")
+
+
+def _resolved_url(spec_url: str | None, spec_text: str | None) -> str | None:
+    """Link thật sự được tải (chỉ khi nguồn là URL); dùng làm gốc để tải các tệp con khi đặc tả chia nhiều tệp."""
+    if (spec_text or "").strip() or not (spec_url or "").strip():
+        return None
+    return spec_import.resolve_spec_url(spec_url)
+
+
+def _fetch_bytes(url: str) -> bytes:
+    return fetch_url(url)[0]
 
 
 def preview(spec_url: str | None, spec_text: str | None, filename: str | None) -> dict:
     raw, _suffix = load_source(spec_url, spec_text, filename)
+    resolved = _resolved_url(spec_url, spec_text)
     try:
-        spec, notes, src_version, errors = spec_import.prepare_spec(raw)
+        spec, notes, src_version, errors = spec_import.prepare_spec(raw, source_url=resolved, fetch=_fetch_bytes)
+    except BenchError:
+        raise
     except ValueError as e:
         raise BenchError(422, "Không đọc được đặc tả", str(e)) from e
     info = spec.get("info") or {}
@@ -159,6 +196,7 @@ def preview(spec_url: str | None, spec_text: str | None, filename: str | None) -
         "security_schemes": list(((spec.get("components") or {}).get("securitySchemes") or {}).keys()),
         "tags": [t.get("name") for t in spec.get("tags") or [] if isinstance(t, dict)][:30],
         "size_bytes": len(raw), "valid": not errors, "errors": errors, "normalization": notes, "suggested": sug,
+        "resolved_url": resolved,
     }
 
 
@@ -170,7 +208,7 @@ def create(body: dict) -> dict:
         auth["in"] = auth.pop("in_")
     cfg = {**{k: v for k, v in body.items() if k not in ("spec_text", "doc_original_text", "doc_original_filename")},
            "auth": auth, "added_via": "web",
-           "spec_url": body.get("spec_url") if not (body.get("spec_text") or "").strip() else None}
+           "spec_url": _resolved_url(body.get("spec_url"), body.get("spec_text"))}
     if cfg.get("spec_url") is None and body.get("filename"):
         cfg["spec_url"] = f"tải lên trực tiếp ({body['filename']})"
     doc = None
@@ -178,7 +216,11 @@ def create(body: dict) -> dict:
         doc = (body["doc_original_text"].encode("utf-8"), Path(body.get("doc_original_filename") or "x.md").suffix.lower())
     with _LOCK:
         try:
-            return spec_import.create_api(root(), cfg, raw, suffix, doc_original=doc)
+            return spec_import.create_api(root(), cfg, raw, suffix, doc_original=doc,
+                                          source_url=_resolved_url(body.get("spec_url"), body.get("spec_text")),
+                                          fetch=_fetch_bytes)
+        except BenchError:
+            raise
         except ValueError as e:
             status = 409 if "đã có API" in str(e) else 422
             raise BenchError(status, "Không thêm được API", str(e)) from e
@@ -193,9 +235,20 @@ def delete(api_id: str) -> None:
         spec_import.delete_api(root(), api_id)
 
 
+def _key_from_dotenv(meta: dict) -> None:
+    """Khóa API (tên biến ghi ở auth.env_var) chưa có trong biến môi trường -> lấy từ tệp .env ở gốc repo, để người
+    dùng chỉ cần ghi khóa vào .env như khóa LLM. Khóa vẫn không bao giờ ghi vào bộ dữ liệu."""
+    var = ((meta.get("environment") or {}).get("auth") or {}).get("env_var") or ""
+    if var and not os.environ.get(var) and DOTENV_PATH.exists():
+        val = dotenv_values(DOTENV_PATH).get(var)
+        if val:
+            os.environ[var] = val
+
+
 def check_connectivity_of(api_id: str) -> dict:
     d = _api_dir(api_id)
     meta = _meta(d)
+    _key_from_dotenv(meta)
     res = check_connectivity.probe(meta)
     ok = isinstance(res.get("status"), int) and 200 <= res["status"] < 300
     if ok and not (meta.get("environment") or {}).get("connectivity_checked"):

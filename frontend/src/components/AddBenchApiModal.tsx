@@ -19,6 +19,14 @@ interface InfoValues extends Omit<BenchApiCreate, "auth" | keyof BenchSourceInpu
   auth_env_var?: string;
 }
 
+// nguồn công khai đã thử thêm thành công – bấm để điền nhanh (xem docs/HUONG_DAN_THEM_API.md)
+const EXAMPLES = [
+  { label: "Open-Meteo · thời tiết (GitHub)", url: "https://github.com/open-meteo/open-meteo/blob/main/openapi/forecast.yml" },
+  { label: "disease.sh · dịch bệnh", url: "https://disease.sh/apidocs/swagger_v3.json" },
+  { label: "Lichess · cờ vua (GitHub, nhiều tệp)", url: "https://github.com/lichess-org/api/blob/master/doc/specs/lichess-api.yaml" },
+  { label: "xkcd · truyện tranh (APIs.guru)", url: "https://api.apis.guru/v2/specs/xkcd.com/1.0.0/openapi.yaml" },
+];
+
 const GROUP_DEFAULTS = {
   A: { env: "local-docker", scope: "full" },
   B: { env: "public", scope: "read-only" },
@@ -96,8 +104,20 @@ export default function AddBenchApiModal({ open, onClose, onCreated }: {
               { value: "file", label: "Tải tệp lên", icon: <UploadOutlined /> },
               { value: "text", label: "Dán nội dung" }]} />
           {mode === "url" && (
-            <Input size="large" value={url} onChange={(e) => { setUrl(e.target.value); preview.reset(); }}
-              placeholder="https://…/openapi.yaml  hoặc  …/openapi.json" data-testid="bench-spec-url" />
+            <>
+              <Input size="large" value={url} onChange={(e) => { setUrl(e.target.value); preview.reset(); }}
+                placeholder="https://github.com/…/openapi.yaml  ·  https://…/swagger.json" data-testid="bench-spec-url" />
+              <div className="src-examples">
+                <span className="lbl">Thử nhanh:</span>
+                {EXAMPLES.map((x) => (
+                  <Button key={x.url} size="small" onClick={() => { setUrl(x.url); preview.reset(); }}>{x.label}</Button>
+                ))}
+              </div>
+              <p className="src-hint">
+                Link GitHub dạng <code>github.com/…/blob/…</code> dán thẳng được – hệ thống tự đổi sang link Raw.
+                Đặc tả chia nhiều tệp (<code>$ref: ./schemas/…</code>) được tự tải và gộp, có thể mất 30–60 giây.
+              </p>
+            </>
           )}
           {mode === "file" && (
             <Upload.Dragger accept=".yaml,.yml,.json" showUploadList={false} multiple={false}
@@ -116,7 +136,7 @@ export default function AddBenchApiModal({ open, onClose, onCreated }: {
             mọi thay đổi. Đặc tả này là <b>ground truth</b> để chấm điểm, nên hãy dùng bản chính thức của nhà cung cấp.
           </p>
           {preview.error && <Alert type="error" showIcon message="Không đọc được đặc tả" description={errorText(preview.error)} />}
-          {p && <PreviewCard p={p} />}
+          {p && <PreviewCard p={p} input={mode === "url" ? url.trim() : null} />}
           <div className="modal-actions">
             <Button onClick={close}>Hủy</Button>
             {p?.valid ? <Button type="primary" onClick={() => goInfo(p)}>Tiếp tục →</Button>
@@ -293,13 +313,18 @@ export default function AddBenchApiModal({ open, onClose, onCreated }: {
   );
 }
 
-function PreviewCard({ p }: { p: BenchPreview }) {
+function PreviewCard({ p, input }: { p: BenchPreview; input: string | null }) {
   return (
     <div style={{ marginTop: 14 }} data-testid="bench-preview">
       {p.valid
         ? <Alert type="success" showIcon message={`Đặc tả hợp lệ – “${p.title ?? "API"}” (${p.source_version} → OpenAPI 3.0.3)`} />
         : <Alert type="error" showIcon message="Đặc tả vẫn chưa hợp lệ sau khi tự sửa"
           description={<ul className="note-list">{p.errors.map((e) => <li key={e}>{e}</li>)}</ul>} />}
+      {p.resolved_url && input && p.resolved_url !== input && (
+        <Alert style={{ marginTop: 8 }} type="info" showIcon message={<>
+          Đã đổi sang link tệp thô (Raw): <span className="mono" style={{ wordBreak: "break-all" }}>{p.resolved_url}</span>
+        </>} />
+      )}
       <Descriptions size="small" column={3} style={{ marginTop: 12 }} items={[
         { key: "o", label: "Operation", children: <b>{p.operations}</b> },
         { key: "p", label: "Đường dẫn", children: p.paths },

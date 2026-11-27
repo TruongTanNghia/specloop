@@ -111,13 +111,17 @@ tài liệu, ground truth) và **tự thêm API mới** qua trình 3 bước:
 
 1. **Đặc tả** – dán URL, tải tệp hoặc dán nội dung OpenAPI 3.0/3.1 hay Swagger 2.0 → *Kiểm tra đặc tả*: hệ thống
    chuẩn hóa về 3.0.3 (chuyển Swagger 2.0, hạ cấp 3.1, sửa lỗi hay gặp) và báo số operation, servers, xác thực, lỗi.
+   Link GitHub/GitLab/Gist dạng trang xem tệp được tự đổi sang link Raw; đặc tả chia nhiều tệp (`$ref` sang tệp khác
+   cùng máy chủ) được tự tải song song và gộp.
 2. **Thông tin** – điền sẵn từ đặc tả: tên, mã, nhóm A/B, môi trường, base URL, xác thực (chỉ ghi *tên biến môi
    trường* chứa khóa, không lưu khóa), giấy phép, tài liệu gốc (tùy chọn), có sinh bản lược ràng buộc hay không.
 3. **Xác nhận** – ghi `SpecLoop-Bench/apis/<mã>/`, sinh facts + tài liệu render, cập nhật `manifest.json`/`stats.csv`,
    chạy kiểm tra toàn vẹn. API mới xuất hiện ngay ở trang *Thực nghiệm*.
 
-Trong khung chi tiết của mỗi API có *Kiểm tra kết nối*, xem tài liệu đầu vào và ground truth. Chỉ xóa được API
-thêm từ web; API gốc của bộ dữ liệu sửa/xóa thủ công trong thư mục. Cùng việc này bằng dòng lệnh: `tools/add_api.py`.
+Trong khung chi tiết của mỗi API có *Kiểm tra kết nối* (khóa API đọc từ biến môi trường hoặc `.env`), xem tài liệu
+đầu vào và ground truth. Chỉ xóa được API thêm từ web; API gốc của bộ dữ liệu sửa/xóa thủ công trong thư mục.
+Cùng việc này bằng dòng lệnh: `tools/add_api.py`. Hướng dẫn từng bước có ảnh, nguồn tìm đặc tả, danh sách link đã thử
+và cách xử lý lỗi: [`docs/HUONG_DAN_THEM_API.md`](docs/HUONG_DAN_THEM_API.md).
 
 An toàn kiểm thử: chỉ gọi host được phép, chặn IP nội bộ ngoài `TEST_ALLOWED_NETWORKS`, ≤ 5 req/s (sandbox) / ≤ 1 req/s
 (công khai), ngân sách 150/30 request mỗi operation, timeout 10 s, API công khai mặc định chỉ GET/HEAD/OPTIONS, header

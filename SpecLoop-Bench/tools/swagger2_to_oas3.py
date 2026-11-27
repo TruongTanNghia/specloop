@@ -26,10 +26,24 @@ COLLECTION_FORMATS = {"csv": ("form", False), "ssv": ("spaceDelimited", False), 
                       "multi": ("form", True)}
 
 
+REF_MAP = (("#/definitions/", "#/components/schemas/"), ("#/parameters/", "#/components/parameters/"),
+           ("#/responses/", "#/components/responses/"))
+
+
 def _fix_refs(node):
+    """Đổi đường dẫn $ref sang components; kiểu `file` (chỉ có ở Swagger 2.0) -> string/binary."""
     if isinstance(node, dict):
-        return {k: (v.replace("#/definitions/", "#/components/schemas/") if k == "$ref" and isinstance(v, str)
-                    else _fix_refs(v)) for k, v in node.items()}
+        out = {}
+        for k, v in node.items():
+            if k == "$ref" and isinstance(v, str):
+                for a, b in REF_MAP:
+                    v = v.replace(a, b) if v.startswith(a) else v
+                out[k] = v
+            else:
+                out[k] = _fix_refs(v)
+        if out.get("type") == "file":
+            out["type"], out["format"] = "string", "binary"
+        return out
     if isinstance(node, list):
         return [_fix_refs(x) for x in node]
     return node
@@ -57,9 +71,17 @@ def _convert_param(p: dict) -> dict:
     return q
 
 
-def _convert_params(params, default_consumes):
+def _convert_params(params, default_consumes, shared=None):
+    """shared = các tham số khai báo chung ở gốc tệp (#/parameters/<tên>)."""
     new_params, body, form = [], None, []
     for p in params or []:
+        if isinstance(p.get("$ref"), str):
+            target = (shared or {}).get(p["$ref"].rsplit("/", 1)[-1])
+            if isinstance(target, dict) and target.get("in") in ("body", "formData"):
+                p = target  # body/formData dùng chung không có chỗ trong components.parameters -> chép vào chỗ
+            else:
+                new_params.append({"$ref": p["$ref"]})
+                continue
         if p.get("in") == "body":
             body = p
         elif p.get("in") == "formData":
@@ -96,6 +118,23 @@ CONTACT_KEYS = {"name", "url", "email"}
 LICENSE_KEYS = {"name", "url"}
 
 
+def _convert_response(r, code, produces) -> dict:
+    if isinstance(r, dict) and "$ref" in r:
+        return {"$ref": r["$ref"]}
+    r = dict(r) if isinstance(r, dict) else {"description": str(r)}
+    sch = r.pop("schema", None)
+    if sch is not None:
+        r["content"] = {m: {"schema": sch} for m in produces}
+    for m, ex in (r.pop("examples", None) or {}).items():  # Swagger 2: examples = {media type: ví dụ}
+        if m in (r.get("content") or {}):
+            r["content"][m]["example"] = ex
+    if isinstance(r.get("headers"), dict):
+        r["headers"] = {hn: {**({"description": hv["description"]} if hv.get("description") else {}),
+                             "schema": _param_schema(hv)} for hn, hv in r["headers"].items()}
+    r.setdefault("description", f"Response {code}")
+    return r
+
+
 def _x_prefix_unknown(obj: dict, known: set) -> dict:
     """Trường ngoài chuẩn (vd. Flasgger thêm responsibleOrganization) -> tiền tố x- để hợp lệ OAS 3.0."""
     return {(k if k in known or k.startswith("x-") else f"x-{k}"): v for k, v in obj.items()}
@@ -120,10 +159,11 @@ def convert(src: dict) -> dict:
         out["externalDocs"] = src["externalDocs"]
     g_consumes = src.get("consumes") or ["application/json"]
     g_produces = src.get("produces") or ["application/json"]
+    g_params = src.get("parameters") or {}
     paths = {}
     for path, item in (src.get("paths") or {}).items():
         new_item = {}
-        shared_params, shared_rb = _convert_params(item.get("parameters"), g_consumes)
+        shared_params, shared_rb = _convert_params(item.get("parameters"), g_consumes, g_params)
         if shared_params:
             new_item["parameters"] = shared_params
         for k, v in item.items():
@@ -135,24 +175,14 @@ def convert(src: dict) -> dict:
             op = dict(v)
             consumes = op.pop("consumes", None) or g_consumes
             produces = op.pop("produces", None) or g_produces
-            params, rb = _convert_params(op.get("parameters"), consumes)
+            params, rb = _convert_params(op.get("parameters"), consumes, g_params)
             op.pop("parameters", None)
             if params:
                 op["parameters"] = params
             rb = rb or shared_rb
             if rb:
                 op["requestBody"] = rb
-            resps = {}
-            for code, r in (op.get("responses") or {}).items():
-                r = dict(r) if isinstance(r, dict) else {"description": str(r)}
-                sch = r.pop("schema", None)
-                if sch is not None:
-                    r["content"] = {m: {"schema": sch} for m in produces}
-                if isinstance(r.get("headers"), dict):
-                    r["headers"] = {hn: {**({"description": hv["description"]} if hv.get("description") else {}),
-                                         "schema": _param_schema(hv)} for hn, hv in r["headers"].items()}
-                r.setdefault("description", f"Response {code}")
-                resps[str(code)] = r
+            resps = {str(code): _convert_response(r, code, produces) for code, r in (op.get("responses") or {}).items()}
             op["responses"] = resps or {"default": {"description": "Default response"}}
             new_item[k] = op
         paths[path] = new_item
@@ -160,6 +190,11 @@ def convert(src: dict) -> dict:
     comps = {}
     if src.get("definitions"):
         comps["schemas"] = src["definitions"]
+    if g_params:
+        comps["parameters"] = {n: _convert_param(p) for n, p in g_params.items()
+                               if isinstance(p, dict) and p.get("in") not in ("body", "formData")}
+    if src.get("responses"):
+        comps["responses"] = {n: _convert_response(r, n, g_produces) for n, r in src["responses"].items()}
     if src.get("securityDefinitions"):
         schemes = {}
         for name, sd in src["securityDefinitions"].items():

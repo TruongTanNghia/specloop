@@ -24,11 +24,12 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 TOOLS = Path(__file__).resolve().parent
 sys.path.insert(0, str(TOOLS))
-from spec_import import create_api  # noqa: E402
+from spec_import import create_api, resolve_spec_url  # noqa: E402
 
 
 def fetch(src: str) -> tuple[bytes, str]:
     if re.match(r"^https?://", src):
+        src = resolve_spec_url(src)
         req = urllib.request.Request(src, headers={"User-Agent": "SpecLoop-Bench/0.1"})
         with urllib.request.urlopen(req, timeout=60) as r:
             return r.read(), Path(src.split("?")[0]).suffix or ".txt"
@@ -63,9 +64,10 @@ def main():
     cfg = {"id": a.id, "name": a.name, "group": a.group, "env": a.env, "scope": a.scope, "base_url": a.base_url,
            "auth": {"type": a.auth, "env_var": a.auth_env}, "license": a.license, "homepage": a.source_url,
            "docs_url": a.docs_url, "make_ablated": a.ablated, "added_via": "cli",
-           "spec_url": a.spec if a.spec.startswith("http") else None}
+           "spec_url": resolve_spec_url(a.spec) if a.spec.startswith("http") else None}
     try:
-        res = create_api(ROOT, cfg, raw, suffix, doc_original=doc, overwrite=a.force)
+        res = create_api(ROOT, cfg, raw, suffix, doc_original=doc, overwrite=a.force,
+                         source_url=cfg["spec_url"], fetch=lambda u: fetch(u)[0])
     except ValueError as e:
         sys.exit(f"Không thêm được: {e}")
     s = res["stats"]

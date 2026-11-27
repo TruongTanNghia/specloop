@@ -117,3 +117,26 @@ Tài khoản và phân quyền (FR-18), Alembic, crawl nhiều trang, tích hợ
 - Sửa kèm: `build_dataset` ghi khóa tệp trong `manifest.json` bằng `/` (trước đó build trên Windows ra `\`); mã API gợi ý bỏ dấu tiếng Việt (“Kho Sách Thử” → `kho-sach-thu`).
 - Tổng quan dùng thẻ KPI có icon, `Steps` 5 bước của vòng lặp, biểu đồ sai lệch theo mã và bảng dự án gần đây; danh sách dự án là bảng dữ liệu có tìm kiếm; chi tiết dự án có đầu trang (tên, chip cấu hình, chọn phiên bản) và tab có icon. Monaco dùng theme sáng cùng bảng màu; Swagger UI dùng nguyên bản sáng.
 - Bảng rộng hơn cột thì cuộn ngang bên trong (`.ant-table-content { overflow-x: auto }`) để không tràn đè lên cột bên cạnh. Mọi `data-testid` và nhãn mà e2e Playwright dựa vào được giữ nguyên khi làm lại giao diện.
+
+## 14. Thêm API từ GitHub và đặc tả nhiều tệp (28/11/2026)
+
+- Link trang xem tệp GitHub/GitLab/Gist (`github.com/<chủ>/<kho>/blob/<nhánh>/<tệp>`) trả về HTML, nên được đổi sang
+  link Raw trước khi tải (`spec_import.resolve_spec_url`); `meta.yaml` lưu link Raw. Nội dung HTML bị nhận ra và báo
+  lỗi có hướng dẫn thay vì lỗi YAML khó hiểu.
+- Đặc tả chia nhiều tệp (`$ref: ./paths/x.yaml`, `common.yaml#/X`) được gộp: tải trước các tệp theo từng lớp, song song
+  16 luồng, tối đa 1 000 tệp; chỉ tải tệp **cùng máy chủ** với tệp gốc (tránh đặc tả lạ khiến backend gọi địa chỉ nội
+  bộ); `$ref` trỏ ngược về tệp gốc giữ nguyên dạng nội bộ; tham chiếu vòng (schema đệ quy) đưa vào
+  `components/schemas`. `source/` lưu **bản đã gộp** để dựng lại ground truth không cần mạng. Bỏ được lý do loại
+  Shlink/Open Food Facts ở mục 12. Lượt tải giữ 15 phút trong bộ nhớ để bước *thêm* dùng lại lượt tải của bước
+  *xem trước* (Lichess 565 tệp: lần đầu ~48 s, lần sau ~8 s).
+- Sửa thêm lỗi hay gặp khi thử đặc tả thật: OAS 3 viết kiểu Swagger 2.0 (`host/basePath/schemes/consumes/produces` ở
+  gốc, tham số không có `schema`), default dạng số của trường chuỗi, OAS 3.1 `type: 'null'` đứng riêng hoặc trong
+  `oneOf`, `required: []`. Bộ chuyển Swagger 2.0 bổ sung `#/parameters`, `#/responses` dùng chung, kiểu `file`,
+  `examples` của phản hồi.
+- Sửa lỗi tiềm ẩn: bước "thêm tham số path thiếu khai báo" không đọc tham số khai báo bằng `$ref` nên thêm bản trùng
+  (đặc tả GitHub REST báo `Duplicate parameter`). Ground truth đã lưu của 20 API không bị ảnh hưởng: chạy lại chuẩn
+  hóa trên `source/` của cả 20 API, kết quả code mới trùng khớp ground truth đang lưu.
+- Không tự đổi `enum` số của trường chuỗi (đặc tả vẫn hợp lệ) để không làm lệch ground truth của `fdic`.
+- Khóa API của bench (`auth.env_var`) được đọc thêm từ `.env` ở gốc repo khi *Kiểm tra kết nối*, cùng chỗ với khóa LLM.
+- Đã thử thêm thật rồi xóa: Open-Meteo (GitHub, 3.1), disease.sh, Lichess (565 tệp), xkcd (APIs.guru), Gitea
+  (Swagger 2.0, 537 op), NASA APOD (khóa). Danh sách và hướng dẫn: `docs/HUONG_DAN_THEM_API.md`.
